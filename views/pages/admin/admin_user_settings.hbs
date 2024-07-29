@@ -1,0 +1,129 @@
+<link rel="stylesheet" href="css/admin.css">
+<div class="body-cont">
+    <div class="sidebar">
+        <div class="row">
+            <div class="image-">
+                <div class="imgtext">
+                    <p>ecopension</p>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-right: 0;">
+            <div class="ul-content_admin" id="admin_ul">
+                <ul>
+                    <p class="side_p">Account Actions</p>
+                    <li class="side_li1 "><i class="fa-solid fa-house"></i><p>Home Page</p></li>
+                    <li class="side_li2 active"><i class="fa-solid fa-user-xmark"></i><p>Add New User</p></li>
+                    <li class="side_li2"><i class="fa-solid fa-pen-to-square"></i><p>Edit User</p></li>
+                    {{!-- <li class="side_li3"><i class="fa-solid fa-spinner"></i>
+                        <p>Reset Accounts</p>
+                    </li> --}}
+                    <p class="side_p" style="padding-top: 20px;">Logs</p>
+                    <li class="side_li4"><i class="fa-solid fa-file-export"></i><p>User Activity</p></li>
+                    {{!-- <p class="side_p" style="padding-top: 20px;">Get user information</p> --}}
+                    {{!-- <li class="side_li5"><i class="fa-regular fa-solid fa-chart-bar"></i>
+                        <p>Wn status</p>
+                    </li> --}}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <header class="header">
+            <p class="hp">Ecopension / Admin / Add new users</p>
+            <p class="hp1">Add New User</p>
+        </header>
+        <div class="admin_herser2">
+
+            <div class="admin_card">
+                <div class="card" style="padding: 25px;">
+                    <div class="card-body">
+                        <H4>Add new user</H4>
+                        <p>After submiting the request, an email will be send to the user with the username and
+                            password.
+                        </p>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="label">First name:</label>
+                                    <input type="text" class="form-control input_field" id="firstname"
+                                        placeholder="Firstname">
+                                    <p style="color:red; font-size:12px;display:none;" id="fver">Please enter a first
+                                        name</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="label">Last name:</label>
+                                    <input type="text" class="form-control input_field" id="lastname"
+                                        placeholder="Last name">
+                                    <p style="color:red; font-size:12px;display:none;" id="lver">Please enter a first
+                                        name</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="label">Email:</label>
+                                    <input type="email" class="form-control input_field" id="email" placeholder="Email">
+                                    <p style="color:red; font-size:12px;display:none;" id="emver">Please enter a first
+                                        name</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="button_cont">
+                                <button id="new_sub">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="delete_user">
+                <div class="card" style="padding: 25px;">
+                    <div class="card-body">
+                        <H4>Delete user</H4>
+                        <p>Search here for the user you want to delete, delete will be permanent</p>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <select class="form-group select_dropdown" id="select_dropdown"
+                                    aria-label="Default select example">
+                                    <option selected disabled>Select a user...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="button_">
+                                    <button id="delete_user">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin_card">
+            <div class="card" style="margin-top: 40px;">
+                <div class="card-body">
+                    <H3>All users</H3>
+                    <p style="color: rgb(128, 128, 128);">View all users that was added in the web-portal</p>
+                    <table class="table table-bordered table-hover dt-responsive homt_tb" id="tbl_user">
+                        <thead class="table_h">
+                            <tr>
+                                <th>Username</th>
+                                <th>Firstname</th>
+                                <th>Lastname</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/actions/new_user.js"></script>

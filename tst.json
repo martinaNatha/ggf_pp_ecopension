@@ -1,0 +1,52 @@
+{
+"POLBR": "FA",
+"POLTY": "ACF",
+"POLNO": "1285331",
+"DATOL": "20240420",
+"DATRP": "20240420",
+"CLMNA": "RearEnd",
+"KTLOC": "Nieuwe Caracasbaaiweg   Macho Barbershop",
+"KTTIM": "1240",
+"KAREG": "94-48A",
+"HUNCD": "ELR",
+"Claimants": [
+{
+"CLMRE": "IN",
+"Transactions": [
+{
+"CAUSE": "COLL",
+"FEEAM": "132.50",
+"STATS": {
+"DRVNA": "Reginald A E Markes",
+"DRSEX": "",
+"DRDOB": "19461112",
+"PHONE": "5237550",
+"DPISS": "",
+"DRPMT": "363406",
+"KGLSE": "20281012"
+}
+}
+]
+},
+{
+"CLMRE": "TP",
+"CLMNT": "FANEYTE JADEN ES",
+"Transactions": [
+{
+"CAUSE": "COLL",
+"LTYPE": "PRD",
+"FEEAM": "132.50",
+"STATS": {
+"DRVN1": "Jaden E S Faneyte",
+"DRDO1": "20020404",
+"PHONE": "5692002",
+"DPIS1": "",
+"DRPM1": "303533",
+"KGLS1": "20250718",
+"KTPRG": "S45-47"
+}
+}
+]
+}
+]
+}

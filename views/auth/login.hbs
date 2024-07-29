@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Login</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="shortcut icon" type="image/x-icon" href="media/guardlogos.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel='stylesheet' type='text/css' media='screen' href='css/login.css'>
+</head>
+
+<body>
+    <section class="login_back" id="login_back">
+        <div class="login_box">
+            <div class="login_right"></div>
+            <div class="login_left">
+                <div class="left_content">
+                    <h1>Login</h1>
+                    <div class="title_text">
+                        <h2>Login your internal portal profile</h2>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Username</label>
+                        <input type="text" class="form-control input_field" id="username" aria-describedby="emailHelp"
+                            placeholder="">
+
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Password</label>
+                        <input type="password" class="form-control input_field" id="password"
+                            aria-describedby="emailHelp" placeholder="">
+                        <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle"></span>
+                    </div>
+                    <button type="button" class="button_log" id="log_buton">Login</button>
+                    {{!-- <div class="fogetpw">
+                        <p>Forget password</p>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="preload" id="preload">
+        <div class="preload_content">
+            <img src="media/guardlogo.png" alt="">
+            <img src="media/guardian_log_text.png" alt="">
+            <div class="LoaderBalls">
+                <div class="LoaderBalls__item"></div>
+                <div class="LoaderBalls__item"></div>
+                <div class="LoaderBalls__item"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.8/dist/sweetalert2.all.min.js"></script>
+<script src="js/login.js">
+</script>
+
+</html>

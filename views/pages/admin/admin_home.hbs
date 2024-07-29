@@ -1,0 +1,102 @@
+<link rel="stylesheet" href="css/admin.css">
+<div class="body-cont">
+    <div class="sidebar">
+        <div class="row">
+            <div class="image-">
+                {{!-- <img class="imglog" src="media/guardlogos.png" alt=""> --}}
+                <div class="imgtext">
+                    <p>ecopension</p>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-right: 0;">
+            <div class="ul-content_admin" id="admin_ul">
+                <ul>
+                    <p class="side_p">Account Actions</p>
+                    <li class="side_li1 active"><i class="fa-solid fa-house"></i><p>Home Page</p></li>
+                    <li class="side_li2"><i class="fa-solid fa-user-xmark"></i><p>Add New User</p></li>
+                    <li class="side_li2"><i class="fa-solid fa-pen-to-square"></i><p>Edit User</p></li>
+                    {{!-- <li class="side_li3"><i class="fa-solid fa-spinner"></i>
+                        <p>Reset Accounts</p>
+                    </li> --}}
+                    <p class="side_p" style="padding-top: 20px;">Logs</p>
+                    <li class="side_li4"><i class="fa-solid fa-file-export"></i><p>User Activity</p></li>
+                    {{!-- <p class="side_p" style="padding-top: 20px;">Get user information</p> --}}
+                    {{!-- <li class="side_li5"><i class="fa-regular fa-solid fa-chart-bar"></i>
+                        <p>Wn status</p>
+                    </li> --}}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <header class="header">
+            <h3>Welcome Administrator</h3>
+            <p class="hp">Ecopension admin portal</p>
+            {{!-- <p class="hp1">Add New User</p> --}}
+        </header>
+        <div class="admin_contentb">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="card" style="width: 19rem;">
+                        <div class="card-body" style="padding: 30px !important;">
+                            <div class="card_content">
+                                <h1 id="useramount"></h1>
+                                <p>Amount Eco Users</p>
+                                <h5>Eco Users</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card" style="width: 19rem;">
+                        <div class="card-body" style="padding: 30px !important;">
+                            <div class="card_content">
+                                <h1>25,265</h1>
+                                <p>Number of wn contracts</p>
+                                <h5>WN Contracts</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card" style="width: 19rem;">
+                        <div class="card-body" style="padding: 30px !important;">
+                            <div class="card_content">
+                                <h1>2,523</h1>
+                                <p>Number of wg contracts</p>
+                                <h5>WG Contracts</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card" style="width: 19rem;">
+                        <div class="card-body" style="padding: 30px !important;">
+                            <div class="card_content">
+                                <h1>125,154</h1>
+                                <p>Number of active members</p>
+                                <h5>Active Members</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{!-- <div class="row" style="margin-top: 50px;">
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="width: 50%; margin: auto;">
+                                <canvas id="myPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> --}}
+        </div>
+    </div>
+
+
+</div>
+
+<script src="js/admin_home.js"></script>

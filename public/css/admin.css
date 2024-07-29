@@ -1,0 +1,141 @@
+.admin_card{
+    padding-left: 40px;
+}
+
+.form-group{
+    width: 100%;
+}
+
+.button_cont{
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding-right: 20px;
+}
+
+.button_cont button{
+    width: 15%;
+    margin-bottom: 20px;
+    background: #F6A146;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.button_cont button:hover{
+    background: #f5b067;
+}
+
+.admin_herser2{
+    width: 100%;
+    display: flex;
+
+}
+
+.delete_user{
+    padding-left: 40px;
+}
+
+.select_dropdown{
+    padding: 5px 5px 5px 5px;
+    border: 1px solid rgb(190, 190, 190);
+    border-radius: 5px;
+    color: rgb(0, 0, 0);
+    font-weight: 400;
+}
+
+.select_dropdown :disabled{
+    background: #dddddd;
+}
+
+.select_dropdown option{
+   color: black;
+}
+
+.button_{
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    margin-top: 15px;
+}
+
+.button_ button{
+    width: 25%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 5px;
+    border: none;
+    background: #9F1330;
+    color: white;
+    font-weight: 400;
+}
+
+.button_ button:hover{
+    background: #9f132fd3;
+}
+
+.ul-content_admin {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 30px;
+}
+
+.ul-content_admin ul {
+    width: 100%;
+}
+
+.ul-content_admin ul li {
+    display: flex;
+    cursor: pointer;
+    padding: 12px 48px;
+}
+
+.ul-content_admin ul li:hover .fa-solid {
+    transform: translate(15px);
+}
+
+.ul-content_admin ul li:hover {
+    background: #76429b0c;
+}
+
+.ul-content_adminul li:hover p {
+    transform: translate(15px);
+}
+
+.ul-content_admin ul li p {
+    color: #2C0845;
+    text-decoration: none;
+    font-weight: 500;
+    transition: transform 0.3s ease;
+    font-size: 15px;
+    margin-bottom: 0;
+}
+
+.info_row{
+    margin-top: 30px;
+}
+
+.result_cont{
+    font-size: 16px;
+    flex-direction: column;
+    justify-content: center;
+    width: 67%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s;
+    padding: 28px;
+    border-radius: 10px;
+    background: #9f1330;
+    color: white;
+}
+
+.result_cont p span{
+    font-weight: 600;
+}
+
+.admin_contentb{
+    padding: 30px 0px 30px 45px;
+}

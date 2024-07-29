@@ -1,0 +1,32 @@
+[
+    {
+        "username": "test",
+        "password": "Guardian10",
+        "name":"Nathaniel Martina",
+        "email":"nathaniel.martina@myguardiangroup.com"
+    },
+    {
+        "username": "ppMisha24",
+        "password": "Hpp02$24",
+        "name":"Hmichaelline Bekker",
+        "email":""
+    },
+    {
+        "username": "ppGimena24",
+        "password": "Gpp03$24",
+        "name":"Gimena Hooi",
+        "email":""
+    },
+    {
+        "username": "ppJenilee24",
+        "password": "Jpp04$24",
+        "name":"Gimena Hooi",
+        "email":""
+    },
+    {
+        "username": "Admin",
+        "password": "mygg@^$to",
+        "name":"Admin",
+        "email":""
+    }
+]

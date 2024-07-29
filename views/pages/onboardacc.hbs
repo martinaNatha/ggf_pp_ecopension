@@ -1,0 +1,71 @@
+<link rel="stylesheet" href="css/onboarding.css">
+
+<div class="body-cont">
+    <div class="sidebar">
+        <div class="row">
+            <div class="image-">
+                <div class="imgtext">
+                    <p>ecopension</p>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-right: 0;">
+            <div class="ul-content" id="user_url_side">
+                <ul>
+                    <p class="side_p">Account Actions</p>
+                    <li class="side_li1 "><i class="fa-solid fa-house"></i><p>Home Page</p></li>
+                    <li class="side_li2"><i class="fa-solid fa-user-xmark"></i><p>Delete Accounts</p></li>
+                    <li class="side_li3"><i class="fa-solid fa-spinner"></i><p>Reset Accounts</p></li>
+                    <p class="side_p" style="padding-top: 20px;">Onboarding account</p>
+                    <li class="side_li4 active"><i class="fa-solid fa-file-export"></i><p>Onboarding</p></li>
+                    <p class="side_p" style="padding-top: 20px;">Get user information</p>
+                    <li class="side_li5"><i class="fa-regular fa-solid fa-chart-bar"></i><p>Wn status</p></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <header class="header">
+            <p class="hp">Ecopension / Onboarding page</p>
+            <p class="hp1">Onboarding new accounts</p>
+        </header>
+        <div class="content_win">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <H3 style="padding: 25px 0px 0px 25px;">Upload CSV files</H3>
+                            <p style="padding-left: 25px;">Upload the requierd files for the onboarding section. The <b>DATA_EMPL_EMAIL &
+                                    DATA_MBR_UPDATE</b>.<br>
+                                All file must be a <b>.csv</b> file format. All files must be uploaded before 5:00pm<br>
+                                <Span>Happy onboarding</Span>
+                            </p>
+                        </div>
+                        <div class="upload-section">
+                            <div class="upload_input_c">
+                                <button class="upload-button upload-button1">
+                                    <div class="file-icon"></div>
+                                     <span class="file-name">No file selected</span>
+                                    <input type="file" id="fileInput1" accept=".csv">
+                                </button>
+                                <button class="upload-button upload-button2" style="">
+                                    <div class="file-icon"></div>
+                                     <span class="file-name">No file selected</span>
+                                    <input type="file" id="fileInput2" accept=".csv">
+                                </button>
+                            </div>
+                            <div class="button_cont">
+                                <button onclick="uploadFiles()">Upload files</button>
+                            </div>
+                            <div class="file-icons">
+                                <div id="fileIcon1" class="file-icon"></div>
+                                <div id="fileIcon2" class="file-icon"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/actions/onboard.js"></script>

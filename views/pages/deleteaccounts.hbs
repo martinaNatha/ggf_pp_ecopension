@@ -1,0 +1,101 @@
+<div class="body-cont">
+    <div class="sidebar">
+        <div class="row">
+            <div class="image-">
+                {{!-- <img class="imglog" src="media/guardlogos.png" alt=""> --}}
+                <div class="imgtext">
+                    <p>ecopension</p>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-right: 0;">
+            <div class="ul-content" id="user_url_side">
+                <ul>
+                    <p class="side_p">Account Actions</p>
+                    <li class="side_li1 "><i class="fa-solid fa-house"></i><p>Home Page</p></li>
+                    <li class="side_li2 active"><i class="fa-solid fa-user-xmark"></i><p>Delete Accounts</p></li>
+                    <li class="side_li3"><i class="fa-solid fa-spinner"></i><p>Reset Accounts</p></li>
+                    <p class="side_p" style="padding-top: 20px;">Onboarding account</p>
+                    <li class="side_li4"><i class="fa-solid fa-file-export"></i><p>Onboarding</p></li>
+                    <p class="side_p" style="padding-top: 20px;">Get user information</p>
+                    <li class="side_li5"><i class="fa-regular fa-solid fa-chart-bar"></i><p>Wn status</p></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <header class="header">
+            <p class="hp">Ecopension / Delete account</p>
+            <p class="hp1">Delete Accounts</p>
+        </header>
+        <div class="content_win">
+            <div class="retab tabs">
+                <a href="" class="active_tb">WN</a>
+                <a href="">WG</a>
+            </div>
+            <div class="delete_cont">
+                <div class="single_main active_display" id="single_main">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            {{!-- Single account delete section --}}
+                            <h4 style="margin-bottom: 2px;">Single Wn account</h4>
+                            <p style="font-size: 14px;">Delete a wn account with a "Anummer"</p>
+                            <div class="form-group">
+                                <label class="label">Anummer</label>
+                                <input type="text" class="form-control input_field" id="wn_value"
+                                    aria-describedby="emailHelp" placeholder="">
+                            </div>
+                            <button id="wnsingle_button" class="sinlge_b" disabled>Delete Wn Account</button>
+                        </div>
+                        <div class="line"></div>
+                        <div class="col-lg-6">
+                            <h4 style="margin-bottom: 2px;">Multiple Wn account</h4>
+                            <p style="font-size: 14px;">Upload an excel file with the column name "Mbr No"</p>
+                            <div class="m-content">
+                                <input type="file" id="excelwninput">
+                                <p id="Emessage">File has been uploaded succesful!</p>
+                                <div class="multi_send_cont">
+                                    <button id="wnmulti_button" class="sinlge_b" disabled>Delete Wn Accounts</button>
+                                    <div class="box" id="box_load">
+                                        <div class="loader-01"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="multi_main" id="multi_main">
+                    <div class="row pt-2">
+                        <div class="col-lg-6">
+                            {{!-- Single account delete section --}}
+                            <h4 style="margin-bottom: 2px;">Single WG account</h4>
+                            <p style="font-size: 14px;">Delete a WG account with a "NameId"</p>
+                            <div class="form-group">
+                                <label class="label">NameId</label>
+                                <input type="text" class="form-control input_field" id="wg_value" placeholder="">
+                            </div>
+                            <button id="wgsingle_button" class="sinlge_b" disabled>Delete Wg Account</button>
+                        </div>
+                        <div class="line"></div>
+                        <div class="col-lg-6">
+                            <h4 style="margin-bottom: 2px;">Multiple Wg account</h4>
+                            <p style="font-size: 14px;">Upload an excel file with the wg "NameID" and there information</p>
+                            <div class="m-content">
+                                <input type="file" id="excelwginput">
+                                <p id="Emessagewg">File has been uploaded succesful!</p>
+                                <div class="multi_send_cont">
+                                    <button id="wgmulti_button" class="sinlge_b" disabled>Delete wg Accounts</button>
+                                    <div class="box" id="box_load2">
+                                        <div class="loader-01"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/actions/delete.js"></script>
