@@ -583,6 +583,31 @@ font-weight: 600;
     opacity: 0;
 }
 
+[class*="loader-"] {
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	color: inherit;
+	vertical-align: middle;
+	pointer-events: none;
+}
+
+.loader-01 {
+	border: .2em dotted #f6a146;
+	border-radius: 50%;
+	animation: 1.5s loader-01 linear infinite;
+}
+
+@keyframes loader-01 {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+
 @keyframes fadeIn {
     from {
         opacity: 0; /* Start opacity */

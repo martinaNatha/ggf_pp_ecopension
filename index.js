@@ -94,10 +94,11 @@ app.post("/login_cred", async (req, res) => {
 });
 
 app.post("/send_delete_info", async (req, res) => {
-  const { data, user_name, amount, type } = req.body;
+  const { data, email, user_name, amount, type } = req.body;
   var date_ = get_date();
 
-  
+  var uniek_id = Math.floor(1000 + Math.random() * 9000);
+
   var action = "Delete";
   const requestAccessToken = () => {
     return new Promise((resolve, reject) => {
@@ -146,7 +147,7 @@ app.post("/send_delete_info", async (req, res) => {
           if (anumber.startsWith("A") || anumber.startsWith("a")) {
             var obj2 = {
               itemData: {
-                Reference: "wn // " + anumber + " // Delete",
+                Reference: uniek_id + " // wn // " + anumber,
                 Priority: "Normal",
                 Name: "pp_internal_portal_requests",
                 DeferDate: null,
@@ -155,10 +156,11 @@ app.post("/send_delete_info", async (req, res) => {
                   task: "delete",
                   anummer: anumber,
                   type: type,
+                  id: uniek_id
                 },
               },
             };
-          } else {
+          } else {  
             var obj2 = {
               itemData: {
                 Reference: "finish // Delete // " + date_,
@@ -171,16 +173,20 @@ app.post("/send_delete_info", async (req, res) => {
                   anummer: anumber,
                   type: "finish",
                   start: date_,
-                  top:amount
+                  user: user_name,
+                  istype: type,
+                  id: uniek_id,
+                  top: amount,
+                  emails:email
                 },
               },
             };
           }
         } else {
-          if (anummer != "finish") {
+          if (anumber != "finish") {
             var obj2 = {
               itemData: {
-                Reference: "wg // " + anumber + " // Delete",
+                Reference: uniek_id + " // wg // " + anumber,
                 Priority: "Normal",
                 Name: "pp_internal_portal_requests",
                 DeferDate: null,
@@ -189,6 +195,7 @@ app.post("/send_delete_info", async (req, res) => {
                   task: "delete",
                   nameid: anumber,
                   type: type,
+                  id: uniek_id
                 },
               },
             };
@@ -205,7 +212,11 @@ app.post("/send_delete_info", async (req, res) => {
                   nameid: anumber,
                   type: "finish",
                   start: date_,
-                  top:amount
+                  user: user_name,
+                  istype: type,
+                  id: uniek_id,
+                  top: amount,
+                  emails:email
                 },
               },
             };
@@ -259,7 +270,10 @@ app.post("/send_delete_info", async (req, res) => {
 });
 
 app.post("/send_reseted_info", (req, res) => {
-  const { data, user_name, amount, type } = req.body;
+  const {  data, email, user_name, amount, type} = req.body;
+  var date_ = get_date();
+
+  var uniek_id = Math.floor(1000 + Math.random() * 9000);
 
   var action = "Reset";
   const requestAccessToken = () => {
@@ -306,35 +320,83 @@ app.post("/send_reseted_info", (req, res) => {
     const promises = data.map((anumber) => {
       return new Promise((resolve, reject) => {
         if (type === "wn") {
-          var obj2 = {
-            itemData: {
-              Reference: "wn // " + anumber + " // Reset",
-              Priority: "Normal",
-              Name: "pp_internal_portal_requests",
-              DeferDate: null,
-              DueDate: null,
-              SpecificContent: {
-                task: "reset",
-                anummer: anumber,
-                type: type,
+          if (anumber.startsWith("A") || anumber.startsWith("a")) {
+            var obj2 = {
+              itemData: {
+                Reference: uniek_id + " // wn // " + anumber,
+                Priority: "Normal",
+                Name: "pp_internal_portal_requests",
+                DeferDate: null,
+                DueDate: null,
+                SpecificContent: {
+                  task: "reset",
+                  anummer: anumber,
+                  type: type,
+                  id: uniek_id
+                },
               },
-            },
-          };
+            };
+          } else {  
+            var obj2 = {
+              itemData: {
+                Reference: "finish // Reset // " + date_,
+                Priority: "Normal",
+                Name: "pp_internal_portal_requests",
+                DeferDate: null,
+                DueDate: null,
+                SpecificContent: {
+                  task: "reset",
+                  anummer: anumber,
+                  type: "finish",
+                  start: date_,
+                  user: user_name,
+                  istype: type,
+                  id: uniek_id,
+                  top: amount,
+                  emails:email
+                },
+              },
+            };
+          }
         } else {
-          var obj2 = {
-            itemData: {
-              Reference: "wg // " + anumber + " // Reset",
-              Priority: "Normal",
-              Name: "pp_internal_portal_requests",
-              DeferDate: null,
-              DueDate: null,
-              SpecificContent: {
-                task: "reset",
-                anummer: anumber,
-                type: type,
+          if (anumber != "finish") {
+            var obj2 = {
+              itemData: {
+                Reference: uniek_id + " // wg // " + anumber,
+                Priority: "Normal",
+                Name: "pp_internal_portal_requests",
+                DeferDate: null,
+                DueDate: null,
+                SpecificContent: {
+                  task: "reset",
+                  nameid: anumber,
+                  type: type,
+                  id: uniek_id
+                },
               },
-            },
-          };
+            };
+          } else {
+            var obj2 = {
+              itemData: {
+                Reference: "finish // Reset // " + date_,
+                Priority: "Normal",
+                Name: "pp_internal_portal_requests",
+                DeferDate: null,
+                DueDate: null,
+                SpecificContent: {
+                  task: "reset",
+                  nameid: anumber,
+                  type: "finish",
+                  start: date_,
+                  user: user_name,
+                  istype: type,
+                  id: uniek_id,
+                  top: amount,
+                  emails:email
+                },
+              },
+            };
+          }
         }
         var request2 = new XMLHttpRequest();
         request2.open(
@@ -569,40 +631,47 @@ app.post("/change_user_data", async (req, res) => {
   }
 });
 
-app.post(
-  "/upload",
-  upload.fields([{ name: "file1" }, { name: "file2" }]),
-  (req, res) => {
-    const file1 = req.files["file1"][0];
-    const file2 = req.files["file2"][0];
+app.post("/upload", upload.fields([{ name: "file1" }, { name: "file2" }]), (req, res) => {
+  const file1 = req.files["file1"][0];
+  const file2 = req.files["file2"][0];
 
-    const requiredName1 = "DATA_EMPL_EMAIL";
-    const requiredName2 = "DATA_MBR_UPDATE";
+  const requiredName1 = "DATA_EMPL_EMAIL";
+  const requiredName2 = "DATA_MBR_UPDATE";
 
-    if (
-      file1.originalname.includes(requiredName1) &&
-      file2.originalname.includes(requiredName2)
-    ) {
-      const file1Path = path.join(specificFolder, file1.originalname);
-      const file2Path = path.join(specificFolder, file2.originalname);
+  if (
+    file1.originalname.includes(requiredName1) &&
+    file2.originalname.includes(requiredName2)
+  ) {
+    const specificFolder = 'specific_folder';
+    const finalFolder = 'final_folder';
 
-      fs.renameSync(file1.path, file1Path);
-      fs.renameSync(file2.path, file2Path);
+    const file1Path = path.join(specificFolder, file1.originalname);
+    const file2Path = path.join(specificFolder, file2.originalname);
 
-      res.json({
-        status: "202",
-        message: "Files uploaded and moved successfully.",
-      });
-    } else {
-      fs.unlinkSync(file1.path);
-      fs.unlinkSync(file2.path);
-      res.json({
-        status: "400",
-        message: "Filenames do not contain the required name.",
-      });
-    }
+    // Move files to the specific folder
+    fs.renameSync(file1.path, file1Path);
+    fs.renameSync(file2.path, file2Path);
+
+    // After moving to the specific folder, move them to the final folder
+    const finalFile1Path = path.join(finalFolder, file1.originalname);
+    const finalFile2Path = path.join(finalFolder, file2.originalname);
+
+    fs.renameSync(file1Path, finalFile1Path);
+    fs.renameSync(file2Path, finalFile2Path);
+
+    res.json({
+      status: "202",
+      message: "Files uploaded and moved successfully.",
+    });
+  } else {
+    fs.unlinkSync(file1.path);
+    fs.unlinkSync(file2.path);
+    res.json({
+      status: "400",
+      message: "Filenames do not contain the required name.",
+    });
   }
-);
+});
 
 app.get("/get_users_act", async (req, res) => {
   try {
@@ -668,7 +737,7 @@ function get_date() {
   const seconds = String(now.getSeconds()).padStart(2, "0");
 
   const formattedDateTime = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
-  
+
   return formattedDateTime;
 }
 

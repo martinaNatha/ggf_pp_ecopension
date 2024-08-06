@@ -5,10 +5,12 @@ var jsonData;
 
 
 var user_name;
+var email;
 function getUserInfo() {
   var tokenEncrypt = sessionStorage.getItem("tokenusers");
   var tokenUser = JSON.parse(tokenEncrypt);
   user_name = tokenUser.firstname + " " + tokenUser.lastname;
+  email = tokenUser.email;
   document.getElementById("userName").innerText = user_name;
   document.getElementById("usName").innerText = "@" + tokenUser.username;
 }
@@ -35,18 +37,32 @@ $(".retab a").click(function (e) {
   }
 });
 
-$(".ul-content_admin ul li").click(function (e) {
+const activePage = localStorage.getItem('activePage');
+console.log(activePage)
+if (activePage) {
+  $(".ul-content ul li").each(function () {
+    if ($(this).text() === activePage) {
+      $(this).addClass('active');
+    }
+  });
+}
+
+$(".ul-content ul li").click(function (e) {
   e.preventDefault();
-  $(".ul-content_admin ul li").removeClass("active");
-  // $(this).addClass('active');
-  console.log($(this).text())
+  $(".ul-content ul li").removeClass("active");
+  $(this).addClass('active');
+  console.log($(this).text());
+
+  // Save the active page to local storage
+  localStorage.setItem('activePage', $(this).text());
+
   if ($(this).text() == "Add New User") {
     window.location.replace("/add_new");
   } else if ($(this).text() == "User Activity") {
     window.location.replace("/useractivity");
   } else if ($(this).text() == "Edit User") {
     window.location.replace("/edituser");
-  }else {
+  } else {
     window.location.replace("/admin_home");
   }
 });
@@ -62,9 +78,9 @@ $(".ul-content ul li").click(function (e) {
     window.location.replace("/deleteaccount");
   } else if ($(this).text() == "Onboarding") {
     window.location.replace("/onboardacc");
-  }else if ($(this).text() == "Wn status") {
+  } else if ($(this).text() == "Wn status") {
     window.location.replace("/check_Status");
-  } 
+  }
   else {
     window.location.replace("/home");
   }

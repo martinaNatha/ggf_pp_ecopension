@@ -1,51 +1,53 @@
+var dataList;
+var jsonData;
+
 // wn actions
 $("#wn_value").on("input", function () {
-    document.getElementById("wnsingle_button").disabled = false;
-  });
+  document.getElementById("wnsingle_button").disabled = false;
+});
 
 $("#wnsingle_button").on("click", function () {
-    var wn_a = document.getElementById("wn_value").value;
-    if (wn_a.startsWith("A") || wn_a.startsWith("a")) {
+  var wn_a = document.getElementById("wn_value").value;
+  if (wn_a.startsWith("A") || wn_a.startsWith("a")) {
     send_reset_data([wn_a], "wn");
-    } else {
-      Swal.fire({
-        title: "Error",
-        text: "Please enter a valid Anumber",
-        icon: "error",
-      });
-    }
-  });
+  } else {
+    Swal.fire({
+      title: "Error",
+      text: "Please enter a valid Anumber",
+      icon: "error",
+    });
+  }
+});
 
-  $("#wnmulti_button").on("click", function () {
-    send_reset_data(dataList, "wn");
-  });
+$("#wnmulti_button").on("click", function () {
+  send_reset_data(dataList, "wn");
+});
 
 
 //   wg actions
-  $("#wg_value").on("input", function () {
-    document.getElementById("wgsingle_button").disabled = false;
-  });
-  
-  $("#wgsingle_button").on("click", function () {
-    var wg_a = document.getElementById("wg_value").value;
-    if (!/[a-zA-Z]/.test(wg_a)) {
-        send_reset_data([wg_a], "wg");
-    } else {
-      Swal.fire({
-        title: "Error",
-        text: "Please enter a valid NameId",
-        icon: "error",
-      });
-    }
-  });
+$("#wg_value").on("input", function () {
+  document.getElementById("wgsingle_button").disabled = false;
+});
 
-  $("#wgmulti_button").on("click", function () {
-    send_reset_data(dataList, "wg");
+$("#wgsingle_button").on("click", function () {
+  var wg_a = document.getElementById("wg_value").value;
+  if (!/[a-zA-Z]/.test(wg_a)) {
+    send_reset_data([wg_a], "wg");
+  } else {
+    Swal.fire({
+      title: "Error",
+      text: "Please enter a valid NameId",
+      icon: "error",
+    });
+  }
+});
+
+$("#wgmulti_button").on("click", function () {
+  send_reset_data(dataList, "wg");
 });
 
 // upload wn section
 document.getElementById('excelwninput').addEventListener('change', wn_file_check);
-
 function wn_file_check(event) {
   const file = event.target.files[0];
   const reader = new FileReader();
@@ -57,7 +59,7 @@ function wn_file_check(event) {
     const worksheet = workbook.Sheets[sheetName];
 
     // Define the header value you're looking for
-    const headerValue = "Mbr No"; // Replace with the actual header value you're looking for
+    const headerValue = "MBR_NO"; // Replace with the actual header value you're looking for
 
     // Find the range of the data
     const range = XLSX.utils.decode_range(worksheet["!ref"]);
@@ -93,8 +95,10 @@ function wn_file_check(event) {
       columnData.push(cellValue);
     }
 
+    const filteredColumnData = columnData.filter((value) => value !== "");
+
     // Check if any value does not start with 'A'
-    const nonAValues = columnData.filter((value) => !value.startsWith("A"));
+    const nonAValues = filteredColumnData.filter((value) => !value.startsWith("A"));
     var emessage = document.getElementById("Emessage");
     var button = document.getElementById("wnmulti_button");
     if (nonAValues.length > 0) {
@@ -124,11 +128,8 @@ function wn_file_check(event) {
 
   reader.readAsArrayBuffer(file);
 }
-
 // upload wg section
-
 document.getElementById('excelwginput').addEventListener('change', wg_file_check);
-
 function wg_file_check(event) {
   const file = event.target.files[0];
   const reader = new FileReader();
@@ -208,65 +209,67 @@ function wg_file_check(event) {
   reader.readAsArrayBuffer(file);
 }
 
-
 // send data to orchestrator
 async function send_reset_data(data, type) {
-    event.preventDefault();
-  
-    var amount = data.length;
-    if (amount > 1 && type == "wn") {
-      var load_box = document.getElementById("box_load");
-      load_box.style.opacity = 1;
-    }else if (amount > 1 && type == "wg") {
-        var load_box = document.getElementById("box_load2");
-        load_box.style.opacity = 1;
-      }
-  
-    var data_info = {
-      data,
-      user_name,
-      amount,
-      type,
-    };
-    console.log(data_info)
-    const result = await fetch("/send_reseted_info", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data_info),
-    }).then((res) => res.json());
-    if (result.status == "202") {
-      if (amount > 1) {
-        load_box.style.opacity = 0;
-      }
-      Swal.fire({
-        title: "Success",
-        text: "In a few minutes a confirmition email will be send to you, with more info",
-        icon: "success",
-      });
-    } else {
-      function extractJSONFromString(str) {
-        const jsonMatch = str.match(/\{.*\}/);
-        if (jsonMatch) {
-          try {
-            const jsonObject = JSON.parse(jsonMatch[0]);
-            return jsonObject;
-          } catch (error) {
-            console.error("Error parsing JSON:", error);
-          }
-        } else {
-          console.error("No JSON found in the string.");
-        }
-        return null;
-      }
-  
-      const extractedJSON = extractJSONFromString(result.error);
-  
-      Swal.fire({
-        title: "Error",
-        text: extractedJSON.message,
-        icon: "error",
-      });
-    }
+  event.preventDefault();
+
+  var amount = data.length;
+  if (amount > 1 && type == "wn") {
+    var load_box = document.getElementById("box_load");
+    load_box.style.opacity = 1;
+  } else if (amount > 1 && type == "wg") {
+    var load_box = document.getElementById("box_load2");
+    load_box.style.opacity = 1;
   }
+
+  //add finsh to first position of array
+  data.unshift('finish');
+  var data_info = {
+    data,
+    email,
+    user_name,
+    amount,
+    type,
+  };
+  
+  const result = await fetch("/send_reseted_info", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data_info),
+  }).then((res) => res.json());
+  if (result.status == "202") {
+    if (amount > 1) {
+      load_box.style.opacity = 0;
+    }
+    Swal.fire({
+      title: "Success",
+      text: "In a few minutes a confirmition email will be send to you, with more info",
+      icon: "success",
+    });
+  } else {
+    function extractJSONFromString(str) {
+      const jsonMatch = str.match(/\{.*\}/);
+      if (jsonMatch) {
+        try {
+          const jsonObject = JSON.parse(jsonMatch[0]);
+          return jsonObject;
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      } else {
+        console.error("No JSON found in the string.");
+      }
+      return null;
+    }
+
+    const extractedJSON = extractJSONFromString(result.error);
+
+    Swal.fire({
+      title: "Error",
+      text: extractedJSON.message,
+      icon: "error",
+    });
+  }
+}
