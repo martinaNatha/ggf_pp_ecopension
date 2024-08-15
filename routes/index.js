@@ -34,4 +34,8 @@ router.get("/useractivity", (req, res) => {
     res.render("pages/admin/useractivity");
   });
 
+router.get("/email_temp", (req, res) => {
+    res.render("pages/email_temp",{layout:false});
+  });
+
   module.exports = router;

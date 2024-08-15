@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.3",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -34,5 +35,8 @@
     "querystring": "^0.2.1",
     "speakeasy": "^2.0.0",
     "xmlhttprequest": "^1.8.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

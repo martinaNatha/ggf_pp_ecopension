@@ -18,6 +18,9 @@ async function get_data() {
   });
 }
 
+
+
+
 // function processData(data) {
 //     const typeAmounts = {};
 

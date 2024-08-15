@@ -12,15 +12,9 @@ const fs = require("fs");
 const querystring = require("querystring");
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const { connectsql, getPool, sql } = require("./database");
-const odbc = require("odbc");
 const { DateTime } = require("mssql");
-const upload = multer({ dest: "uploads/" });
-
-const specificFolder = path.join(__dirname, "uploads");
-
-if (!fs.existsSync(specificFolder)) {
-  fs.mkdirSync(specificFolder);
-}
+const { exec } = require('child_process');
+const axios = require('axios');
 
 require("dotenv").config();
 
@@ -160,7 +154,7 @@ app.post("/send_delete_info", async (req, res) => {
                 },
               },
             };
-          } else {  
+          } else {
             var obj2 = {
               itemData: {
                 Reference: "finish // Delete // " + date_,
@@ -177,7 +171,7 @@ app.post("/send_delete_info", async (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails:email
+                  emails: email
                 },
               },
             };
@@ -216,7 +210,7 @@ app.post("/send_delete_info", async (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails:email
+                  emails: email
                 },
               },
             };
@@ -270,7 +264,7 @@ app.post("/send_delete_info", async (req, res) => {
 });
 
 app.post("/send_reseted_info", (req, res) => {
-  const {  data, email, user_name, amount, type} = req.body;
+  const { data, email, user_name, amount, type } = req.body;
   var date_ = get_date();
 
   var uniek_id = Math.floor(1000 + Math.random() * 9000);
@@ -336,7 +330,7 @@ app.post("/send_reseted_info", (req, res) => {
                 },
               },
             };
-          } else {  
+          } else {
             var obj2 = {
               itemData: {
                 Reference: "finish // Reset // " + date_,
@@ -353,7 +347,7 @@ app.post("/send_reseted_info", (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails:email
+                  emails: email
                 },
               },
             };
@@ -392,7 +386,7 @@ app.post("/send_reseted_info", (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails:email
+                  emails: email
                 },
               },
             };
@@ -631,48 +625,6 @@ app.post("/change_user_data", async (req, res) => {
   }
 });
 
-app.post("/upload", upload.fields([{ name: "file1" }, { name: "file2" }]), (req, res) => {
-  const file1 = req.files["file1"][0];
-  const file2 = req.files["file2"][0];
-
-  const requiredName1 = "DATA_EMPL_EMAIL";
-  const requiredName2 = "DATA_MBR_UPDATE";
-
-  if (
-    file1.originalname.includes(requiredName1) &&
-    file2.originalname.includes(requiredName2)
-  ) {
-    const specificFolder = 'specific_folder';
-    const finalFolder = 'final_folder';
-
-    const file1Path = path.join(specificFolder, file1.originalname);
-    const file2Path = path.join(specificFolder, file2.originalname);
-
-    // Move files to the specific folder
-    fs.renameSync(file1.path, file1Path);
-    fs.renameSync(file2.path, file2Path);
-
-    // After moving to the specific folder, move them to the final folder
-    const finalFile1Path = path.join(finalFolder, file1.originalname);
-    const finalFile2Path = path.join(finalFolder, file2.originalname);
-
-    fs.renameSync(file1Path, finalFile1Path);
-    fs.renameSync(file2Path, finalFile2Path);
-
-    res.json({
-      status: "202",
-      message: "Files uploaded and moved successfully.",
-    });
-  } else {
-    fs.unlinkSync(file1.path);
-    fs.unlinkSync(file2.path);
-    res.json({
-      status: "400",
-      message: "Filenames do not contain the required name.",
-    });
-  }
-});
-
 app.get("/get_users_act", async (req, res) => {
   try {
     const pool = getPool();
@@ -698,6 +650,92 @@ app.get("/get_users_login", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+function moveFiles(srcFilePath, destDirPath, fileName) {
+  const destFilePath = path.join(destDirPath, fileName);
+
+  // Copy the file to the destination
+  fs.copyFile(srcFilePath, destFilePath, (err) => {
+    if (err) {
+      console.error('Error copying file:', err);
+      return;
+    }
+    console.log(`File copied to ${destFilePath}`);
+    // Delete the source file after copying
+    fs.unlink(srcFilePath, (err) => {
+      if (err) {
+        console.error('Error deleting the original file:', err);
+      } else {
+        console.log(`Original file ${srcFilePath} deleted successfully`);
+      }
+    });
+  });
+}
+
+// Function to check if the network path requires credentials
+function checkNetworkPath(path, callback) {
+  fs.access(path, fs.constants.F_OK, (err) => {
+    if (err) {
+      if (err.code === 'ENOENT' || err.code === 'EACCES') {
+        console.log('Network path requires credentials or does not exist.');
+        callback(false);
+      } else {
+        console.error('Error accessing path:', err);
+        callback(false);
+      }
+    } else {
+      console.log('Network path accessible.');
+      callback(true);
+    }
+  });
+}
+
+const upload = multer({ dest: 'uploads/' });
+
+app.post('/upload', upload.fields([{ name: 'file1' }, { name: 'file2' }]), (req, res) => {
+  const file1 = req.files['file1'] ? req.files['file1'][0] : null;
+  const file2 = req.files['file2'] ? req.files['file2'][0] : null;
+
+  // Check if at least one file is provided
+  if (!file1 && !file2) {
+    return res.status(400).json({ status: "400", msg: "At least one file must be uploaded." });
+  }
+
+  const networkPath = 'Y:\\UIPATH_DEV\\dmz_to_futurama';
+
+  checkNetworkPath(networkPath, (accessible) => {
+    if (accessible) {
+      // Move file1 if it exists
+      if (file1) {
+        moveFiles(file1.path, networkPath, file1.originalname);
+      }
+      
+      // Move file2 if it exists
+      if (file2) {
+        moveFiles(file2.path, networkPath, file2.originalname);
+      }
+
+      // Construct a success message depending on the files received
+      let successMessage = file1 && file2 ? 
+        `${file1.originalname} and ${file2.originalname} were copied successfully.` : 
+        `${file1 ? file1.originalname : file2.originalname} was copied successfully.`;
+
+      // Store data (for both files or single file)
+      store_data(
+        file1 && file2 ? `${file1.originalname} and ${file2.originalname}` : `${file1 ? file1.originalname : file2.originalname}`, 
+        req.body.username, 
+        "", 
+        "", 
+        "Onboarding"
+      );
+
+      res.status(202).json({ status: "202", msg: successMessage });
+    } else {
+      res.status(404).json({ status: "404", msg: "Network path inaccessible, file(s) were not copied." });
+    }
+  });
+});
+
 
 async function store_data(info, name_u, type, Aamount, action) {
   try {
@@ -741,38 +779,7 @@ function get_date() {
   return formattedDateTime;
 }
 
-// const connectionString = 'DSN=DSN_PR71;UID=UIPATH;PWD=Welcome123#'; // Replace with your DSN, username, and password
 
-// async function connectAndQuery() {
-//   let connection;
-//   try {
-//     // Connect to the ODBC database
-//     connection = await odbc.connect(connectionString);
-
-//     // Execute a query
-//     const query = 'SELECT TOP(10) FROM PORTAL.PTL_MEMBERS';
-//     const result = await connection.query(query);
-
-//     // Process the results
-//     console.log('Query results:', result);
-
-//   } catch (error) {
-//     console.error('Error connecting or querying:', error);
-//   } finally {
-//     // Close the connection
-//     if (connection) {
-//       try {
-//         await connection.close();
-//         console.log('Connection closed');
-//       } catch (error) {
-//         console.error('Error closing connection:', error);
-//       }
-//     }
-//   }
-// }
-
-// Call the function to connect and query
-// connectAndQuery();
 
 app.use(require("./routes"));
 app.use(express.static(path.join(__dirname, "public")));

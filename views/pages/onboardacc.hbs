@@ -20,20 +20,20 @@
                         </p>
                     </div>
                     <div class="upload-section">
-                        <div class="upload_input_c">
+                        <form class="upload_input_c"  id="uploadForm" enctype="multipart/form-data">
                             <button class="upload-button upload-button1">
                                 <div class="file-icon"></div>
                                 <span class="file-name">No file selected</span>
-                                <input type="file" id="fileInput1" accept=".csv">
+                                <input type="file" name="file1" id="fileInput1" accept=".csv">
                             </button>
                             <button class="upload-button upload-button2" style="">
                                 <div class="file-icon"></div>
                                 <span class="file-name">No file selected</span>
-                                <input type="file" id="fileInput2" accept=".csv">
+                                <input type="file" name="file2" id="fileInput2" accept=".csv">
                             </button>
-                        </div>
+                        </form>
                         <div class="button_cont">
-                            <button onclick="uploadFiles()">Upload files</button>
+                            <button  onclick="uploadFiles()">Upload files</button>
                         </div>
                         <div class="file-icons">
                             <div id="fileIcon1" class="file-icon"></div>

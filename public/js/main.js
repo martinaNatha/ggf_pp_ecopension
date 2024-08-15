@@ -96,3 +96,29 @@ profile.onclick = function () {
 $("#tbl_home").dataTable({
   lengthChange: false,
 });
+
+
+async function fetchData() {
+  try {
+      const response = await fetch('/api/data');
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      const tableBody = document.querySelector('#data-table tbody');
+
+      data.forEach(row => {
+          const tr = document.createElement('tr');
+          Object.values(row).forEach(value => {
+              const td = document.createElement('td');
+              td.textContent = value;
+              tr.appendChild(td);
+          });
+          tableBody.appendChild(tr);
+      });
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+}
+
+// fetchData();
