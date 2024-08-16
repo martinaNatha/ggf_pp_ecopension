@@ -12,9 +12,10 @@ const fs = require("fs");
 const querystring = require("querystring");
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const { connectsql, getPool, sql } = require("./database");
-const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
-const axios = require('axios');
+const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
+const axios = require("axios");
 
 require("dotenv").config();
 
@@ -78,10 +79,15 @@ app.post("/login_cred", async (req, res) => {
       if (isMatch) {
         await pool
           .request()
-          .query(`INSERT INTO login_logs(users) VALUES('${result.recordset[0].firstname}')`);
+          .query(
+            `INSERT INTO login_logs(users) VALUES('${result.recordset[0].firstname}')`
+          );
         res.json({ status: "202", data: result.recordset });
       } else {
-        res.json({ status: "404", msg: "Username or password is not correct!" });
+        res.json({
+          status: "404",
+          msg: "Username or password is not correct!",
+        });
       }
     } else {
       res.json({ status: "404", msg: "Username or password is not correct!" });
@@ -155,7 +161,7 @@ app.post("/send_delete_info", async (req, res) => {
                   task: "delete",
                   anummer: anumber,
                   type: type,
-                  id: uniek_id
+                  id: uniek_id,
                 },
               },
             };
@@ -176,7 +182,7 @@ app.post("/send_delete_info", async (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails: email
+                  emails: email,
                 },
               },
             };
@@ -194,7 +200,7 @@ app.post("/send_delete_info", async (req, res) => {
                   task: "delete",
                   nameid: anumber,
                   type: type,
-                  id: uniek_id
+                  id: uniek_id,
                 },
               },
             };
@@ -215,7 +221,7 @@ app.post("/send_delete_info", async (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails: email
+                  emails: email,
                 },
               },
             };
@@ -331,7 +337,7 @@ app.post("/send_reseted_info", (req, res) => {
                   task: "reset",
                   anummer: anumber,
                   type: type,
-                  id: uniek_id
+                  id: uniek_id,
                 },
               },
             };
@@ -352,7 +358,7 @@ app.post("/send_reseted_info", (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails: email
+                  emails: email,
                 },
               },
             };
@@ -370,7 +376,7 @@ app.post("/send_reseted_info", (req, res) => {
                   task: "reset",
                   nameid: anumber,
                   type: type,
-                  id: uniek_id
+                  id: uniek_id,
                 },
               },
             };
@@ -391,7 +397,7 @@ app.post("/send_reseted_info", (req, res) => {
                   istype: type,
                   id: uniek_id,
                   top: amount,
-                  emails: email
+                  emails: email,
                 },
               },
             };
@@ -499,7 +505,7 @@ app.post("/add_new_user", async (req, res) => {
 
       // Optionally send the unhashed password to the user via email or log it securely
       // For example:
-      send_email(email,firstname, username, password);
+      send_email(email, firstname, username, password);
 
       res.json({ status: "202", message: "User created successfully" });
     }
@@ -671,14 +677,14 @@ function moveFiles(srcFilePath, destDirPath, fileName) {
   // Copy the file to the destination
   fs.copyFile(srcFilePath, destFilePath, (err) => {
     if (err) {
-      console.error('Error copying file:', err);
+      console.error("Error copying file:", err);
       return;
     }
     console.log(`File copied to ${destFilePath}`);
     // Delete the source file after copying
     fs.unlink(srcFilePath, (err) => {
       if (err) {
-        console.error('Error deleting the original file:', err);
+        console.error("Error deleting the original file:", err);
       } else {
         console.log(`Original file ${srcFilePath} deleted successfully`);
       }
@@ -690,67 +696,80 @@ function moveFiles(srcFilePath, destDirPath, fileName) {
 function checkNetworkPath(path, callback) {
   fs.access(path, fs.constants.F_OK, (err) => {
     if (err) {
-      if (err.code === 'ENOENT' || err.code === 'EACCES') {
-        console.log('Network path requires credentials or does not exist.');
+      if (err.code === "ENOENT" || err.code === "EACCES") {
+        console.log("Network path requires credentials or does not exist.");
         callback(false);
       } else {
-        console.error('Error accessing path:', err);
+        console.error("Error accessing path:", err);
         callback(false);
       }
     } else {
-      console.log('Network path accessible.');
+      console.log("Network path accessible.");
       callback(true);
     }
   });
 }
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: "uploads/" });
 
-app.post('/upload', upload.fields([{ name: 'file1' }, { name: 'file2' }]), (req, res) => {
-  const file1 = req.files['file1'] ? req.files['file1'][0] : null;
-  const file2 = req.files['file2'] ? req.files['file2'][0] : null;
+app.post(
+  "/upload",
+  upload.fields([{ name: "file1" }, { name: "file2" }]),
+  (req, res) => {
+    const file1 = req.files["file1"] ? req.files["file1"][0] : null;
+    const file2 = req.files["file2"] ? req.files["file2"][0] : null;
 
-  // Check if at least one file is provided
-  if (!file1 && !file2) {
-    return res.status(400).json({ status: "400", msg: "At least one file must be uploaded." });
-  }
-
-  const networkPath = '//Cwcurdcfsp01/GGF-DATA/UIPATH_DEV/dmz_to_futurama';
-  // const networkPath = 'Y:\\UIPATH_DEV\\dmz_to_futurama';
-
-  checkNetworkPath(networkPath, (accessible) => {
-    if (accessible) {
-      // Move file1 if it exists
-      if (file1) {
-        moveFiles(file1.path, networkPath, file1.originalname);
-      }
-      
-      // Move file2 if it exists
-      if (file2) {
-        moveFiles(file2.path, networkPath, file2.originalname);
-      }
-
-      // Construct a success message depending on the files received
-      let successMessage = file1 && file2 ? 
-        `${file1.originalname} and ${file2.originalname} were copied successfully.` : 
-        `${file1 ? file1.originalname : file2.originalname} was copied successfully.`;
-
-      // Store data (for both files or single file)
-      store_data(
-        file1 && file2 ? `${file1.originalname} and ${file2.originalname}` : `${file1 ? file1.originalname : file2.originalname}`, 
-        req.body.username, 
-        "", 
-        "", 
-        "Onboarding"
-      );
-
-      res.status(202).json({ status: "202", msg: successMessage });
-    } else {
-      res.status(404).json({ status: "404", msg: "Network path inaccessible, file(s) were not copied." });
+    // Check if at least one file is provided
+    if (!file1 && !file2) {
+      return res
+        .status(400)
+        .json({ status: "400", msg: "At least one file must be uploaded." });
     }
-  });
-});
 
+    const networkPath = "//Cwcurdcfsp01/GGF-DATA/UIPATH_DEV/dmz_to_futurama";
+    // const networkPath = 'Y:\\UIPATH_DEV\\dmz_to_futurama';
+
+    checkNetworkPath(networkPath, (accessible) => {
+      if (accessible) {
+        // Move file1 if it exists
+        if (file1) {
+          moveFiles(file1.path, networkPath, file1.originalname);
+        }
+
+        // Move file2 if it exists
+        if (file2) {
+          moveFiles(file2.path, networkPath, file2.originalname);
+        }
+
+        // Construct a success message depending on the files received
+        let successMessage =
+          file1 && file2
+            ? `${file1.originalname} and ${file2.originalname} were copied successfully.`
+            : `${
+                file1 ? file1.originalname : file2.originalname
+              } was copied successfully.`;
+
+        // Store data (for both files or single file)
+        store_data(
+          file1 && file2
+            ? `${file1.originalname} and ${file2.originalname}`
+            : `${file1 ? file1.originalname : file2.originalname}`,
+          req.body.username,
+          "",
+          "",
+          "Onboarding"
+        );
+
+        res.status(202).json({ status: "202", msg: successMessage });
+      } else {
+        res.status(404).json({
+          status: "404",
+          msg: "Network path inaccessible, file(s) were not copied.",
+        });
+      }
+    });
+  }
+);
 
 async function store_data(info, name_u, type, Aamount, action) {
   try {
@@ -794,40 +813,338 @@ function get_date() {
   return formattedDateTime;
 }
 
-function send_email(email, name, username, password){
+function send_email(email, name, username, password) {
   let transporter = nodemailer.createTransport({
-    host: 'smtp-mail.outlook.com', // Outlook SMTP server
-    port: 587,                      // SMTP port for Outlook
-    secure: false,                  // true for 465, false for other ports
+    host: "smtp.sendgrid.net",
+    port: 587,
+    secure: false,
     auth: {
-      user: 'nathaniel.martina@myguardiangroup.com', // Your Outlook email address
-      pass: 'ILY2025@$',          // Your Outlook email password
+      user: "apikey",
+      pass: process.env.EMAIL_P,
+    },
+    tls: {
+      rejectUnauthorized: false,
     },
   });
-  
-  // Define email options
+
+  // Set up email data
   let mailOptions = {
-    from: '"Ecopension" <nathaniel.martina@myguardiangroup.com>', // Sender address
-    to: email,                          // List of receivers
-    subject: 'Ecopension portal credentials',                      // Plain text body
-    html: '<b>Hi, </b>' + name +"<br> Here is your username and password " +username + "  " + password,                          // HTML body content
+    from: "Ecopension <ggf_internal@myguardiangroup.com>",
+    to: email,
+    subject: "Your new Ecopension credentials",
+    html: `<!DOCTYPE html>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: inherit !important;
+        }
+
+        #MessageViewBody a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        p {
+            line-height: inherit
+        }
+
+        .desktop_hide,
+        .desktop_hide table {
+            mso-hide: all;
+            display: none;
+            max-height: 0px;
+            overflow: hidden;
+        }
+
+        .image_block img+div {
+            display: none;
+        }
+
+        @media (max-width:655px) {
+
+            .desktop_hide table.icons-inner,
+            .social_block.desktop_hide .social-table {
+                display: inline-block !important;
+            }
+
+            .icons-inner {
+                text-align: center;
+            }
+
+            .icons-inner td {
+                margin: 0 auto;
+            }
+
+            .mobile_hide {
+                display: none;
+            }
+
+            .row-content {
+                width: 100% !important;
+            }
+
+            .stack .column {
+                width: 100%;
+                display: block;
+            }
+
+            .mobile_hide {
+                min-height: 0;
+                max-height: 0;
+                max-width: 0;
+                overflow: hidden;
+                font-size: 0px;
+            }
+
+            .desktop_hide,
+            .desktop_hide table {
+                display: table !important;
+                max-height: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="body" style="margin: 0; background-color: #f1f1f1; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
+    <table class="nl-container" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f1f1f1;">
+        <tbody>
+            <tr>
+                <td>
+                    <table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f1f1f1; color: #000000; width: 635px; margin: 0 auto;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+                                                    <div class="spacer_block block-1" style="height:20px;line-height:20px;font-size:1px;"> </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: #ffffff;color: #000000;width: 635px;margin: 0 auto;background: #2C0845;height: 48px;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 15px; padding-top: 15px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="row row-3" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff; color: #000000; width: 635px; margin: 0 650px;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" style="/* width: 100%; */mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-weight: 400;text-align: left;/* padding-bottom: 5px; *//* padding-bottom: 5px; *//* padding-left: 28px; *//* padding-top: 10px; */vertical-align: top;border-top: 0px;border-right: 0px;border-bottom: 0px;border-left: 0px;padding: 45px;">
+                                                    
+                                                    <table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="pad" style="padding-bottom:10px;padding-top:10px;">
+                                                                    <div style="color:#000000;font-family:Poppins, Arial, Helvetica, sans-serif;font-size:25px;line-height:120%;text-align:left;mso-line-height-alt:36px;">
+                                                                        <p style="margin: 0; word-break: break-word;">
+                                                                            <span><strong>Hi, ${name}</strong></span>
+                                                                        </p>
+                                                                        <p style="font-size: 16px;margin-bottom:0;line-height: 25px;">
+                                                                            Here we send you the credentials for your Ecopension account</p>
+                                                                        <br>
+                                                                        <p style="font-size: 16px;margin-top:0;margin-bottom:0;line-height: 0px;">
+                                                                            Username: <strong>${username}</strong>        Password: <strong>${password}</strong>
+                                                                        </p>
+                                                                        <p style="font-size: 16px;margin-top:20px;margin-bottom:0;line-height: 25px;">
+                                                                           Web-portal url: 
+                                                                        </p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="row row-4" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f1f1f1; color: #000000; width: 635px; margin: 0 auto;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 15px; padding-top: 15px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+                                                    <div class="spacer_block block-1" style="height:20px;line-height:20px;font-size:1px;"> </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="row row-5" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: #F6A146;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: #F6A146;color: #000000;width: 635px;margin: 0 auto;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 20px; padding-top: 10px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+                                                    
+                                                     <table class="paragraph_block block-6" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;word-break: break-word;padding-top: 45px;padding-bottom: 55px;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="pad" style="padding-left:10px;padding-right:10px;">
+                                                                    <div style="color:#ffffff;font-family:Poppins, Arial, Helvetica, sans-serif;font-size:11px;line-height:120%;text-align:center;mso-line-height-alt:13.2px;">
+                                                                        <h1 style="margin-bottom: 10px;word-break: break-word;font-size: 35px;height: 29px;">
+                                                                            Ecopension
+                                                                        </h1>
+                                                                        <p style="margin: 0;word-break: break-word;font-size: 20px;height: 29px;font-weight:400;">
+                                                                            Your Pension Web-Portal
+                                                                        </p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    
+                                                    <table class="divider_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="pad">
+                                                                    <div class="alignment" align="center">
+                                                                        <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <td class="divider_inner" style="font-size: 1px; line-height: 1px; border-top: 1px solid #93CADE;">
+                                                                                        <span></span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <table class="paragraph_block block-5" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="pad" style="padding-left:10px;padding-right:10px;">
+                                                                    <div style="color:#ffffff;font-family:Poppins, Arial, Helvetica, sans-serif;font-size:14px;line-height:120%;text-align:center;mso-line-height-alt:16.8px;">
+                                                                        <p style="margin: 0; word-break: break-word;">
+                                                                            &nbsp;</p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <table class="paragraph_block block-6" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="pad" style="padding-left:10px;padding-right:10px;">
+                                                                    <div style="color:#ffffff;font-family:Poppins, Arial, Helvetica, sans-serif;font-size:11px;line-height:120%;text-align:center;mso-line-height-alt:13.2px;">
+                                                                        <p style="margin: 0; word-break: break-word;">
+                                                                            <span>Thank you for using our Ecopension portal. If you have any question
+                                                                                please send us an email at</span>
+                                                                        </p>
+                                                                        <p style="margin: 0; word-break: break-word;text-decoration:none;color:white;">
+                                                                            <span>_ftmcuritdevelopers@myguardiangroup.com
+                                                                                and we will help you with anything you
+                                                                                need.</span>
+                                                                        </p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <table class="paragraph_block block-7" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="pad" style="padding-left:10px;padding-right:10px;">
+                                                                    <div style="color:#ffffff;font-family:Poppins, Arial, Helvetica, sans-serif;font-size:14px;line-height:120%;text-align:center;mso-line-height-alt:16.8px;">
+                                                                        <p style="margin: 0; word-break: break-word;">
+                                                                            &nbsp;</p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table><!-- End -->
+
+
+    <textarea id="edCb" style="position: absolute; top: 0px; left: 0px; width: 0px; height: 0px; display: none;"></textarea>
+
+
+
+
+
+
+
+
+</body>
+
+</html>`,
   };
-  
-  // Send mail with defined transport object
+
+  // Send the email
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       return console.log(error);
     }
-    console.log('Message sent: %s', info.messageId);
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    console.log("Message sent: %s", info.messageId);
   });
 }
-
 
 app.use(require("./routes"));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.set("port", process.env.PORT || 5002);
+app.set("port", process.env.PORT || 8086);
 
 server.listen(app.get("port"), () => {
   console.log("server on port", app.get("port"));
