@@ -12,8 +12,8 @@ const fs = require("fs");
 const querystring = require("querystring");
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const { connectsql, getPool, sql } = require("./database");
-const { DateTime } = require("mssql");
-const { exec } = require('child_process');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 const axios = require('axios');
 
 require("dotenv").config();
@@ -67,17 +67,22 @@ app.post("/login_cred", async (req, res) => {
     const pool = getPool();
     const result = await pool
       .request()
-      .query(
-        `SELECT * FROM web_users WHERE username = '${username}' AND password = '${password}'`
-      );
+      .query(`SELECT * FROM web_users WHERE username = '${username}'`);
 
     if (result.recordset.length > 0) {
-      const result_ = await pool
-        .request()
-        .query(
-          `insert into login_logs(users) values('${result.recordset[0].firstname}')`
-        );
-      res.json({ status: "202", data: result.recordset });
+      const hashedPassword = result.recordset[0].password;
+
+      // Compare the input password with the hashed password in the database
+      const isMatch = await bcrypt.compare(password, hashedPassword);
+
+      if (isMatch) {
+        await pool
+          .request()
+          .query(`INSERT INTO login_logs(users) VALUES('${result.recordset[0].firstname}')`);
+        res.json({ status: "202", data: result.recordset });
+      } else {
+        res.json({ status: "404", msg: "Username or password is not correct!" });
+      }
     } else {
       res.json({ status: "404", msg: "Username or password is not correct!" });
     }
@@ -456,15 +461,12 @@ app.post("/add_new_user", async (req, res) => {
     symbols.charAt(index);
   const secret = Math.floor(Math.random() * 1000000000);
 
-  // send emaill with credentials
-
   try {
     const pool = getPool();
     const request = pool.request();
 
     // Add parameters to the request
     request.input("username", sql.VarChar, username);
-    request.input("password", sql.VarChar, password); // Adjust type if needed
     request.input("firstname", sql.VarChar, firstname);
     request.input("lastname", sql.VarChar, lastname);
     request.input("email", sql.VarChar, email);
@@ -481,13 +483,25 @@ app.post("/add_new_user", async (req, res) => {
       // User already exists
       res.json({ status: "409", message: "User already exists" });
     } else {
-      // User does not exist, proceed with the insert
+      // Hash the password before storing it
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Add the hashed password to the request
+      request.input("password", sql.VarChar, hashedPassword);
+
+      // Insert the new user with the hashed password
       const insertQuery = `
         INSERT INTO web_users(username, password, firstname, lastname, email)
         VALUES (@username, @password, @firstname, @lastname, @email)
       `;
-      const result = await request.query(insertQuery);
-      res.json({ status: "202" });
+      await request.query(insertQuery);
+
+      // Optionally send the unhashed password to the user via email or log it securely
+      // For example:
+      send_email(email,firstname, username, password);
+
+      res.json({ status: "202", message: "User created successfully" });
     }
   } catch (err) {
     console.error("Error executing query", err);
@@ -701,7 +715,8 @@ app.post('/upload', upload.fields([{ name: 'file1' }, { name: 'file2' }]), (req,
     return res.status(400).json({ status: "400", msg: "At least one file must be uploaded." });
   }
 
-  const networkPath = 'Y:\\UIPATH_DEV\\dmz_to_futurama';
+  const networkPath = '//Cwcurdcfsp01/GGF-DATA/UIPATH_DEV/dmz_to_futurama';
+  // const networkPath = 'Y:\\UIPATH_DEV\\dmz_to_futurama';
 
   checkNetworkPath(networkPath, (accessible) => {
     if (accessible) {
@@ -779,6 +794,34 @@ function get_date() {
   return formattedDateTime;
 }
 
+function send_email(email, name, username, password){
+  let transporter = nodemailer.createTransport({
+    host: 'smtp-mail.outlook.com', // Outlook SMTP server
+    port: 587,                      // SMTP port for Outlook
+    secure: false,                  // true for 465, false for other ports
+    auth: {
+      user: 'nathaniel.martina@myguardiangroup.com', // Your Outlook email address
+      pass: 'ILY2025@$',          // Your Outlook email password
+    },
+  });
+  
+  // Define email options
+  let mailOptions = {
+    from: '"Ecopension" <nathaniel.martina@myguardiangroup.com>', // Sender address
+    to: email,                          // List of receivers
+    subject: 'Ecopension portal credentials',                      // Plain text body
+    html: '<b>Hi, </b>' + name +"<br> Here is your username and password " +username + "  " + password,                          // HTML body content
+  };
+  
+  // Send mail with defined transport object
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log(error);
+    }
+    console.log('Message sent: %s', info.messageId);
+    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+  });
+}
 
 
 app.use(require("./routes"));

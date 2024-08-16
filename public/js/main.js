@@ -47,7 +47,7 @@ if (activePage) {
   });
 }
 
-$(".ul-content ul li").click(function (e) {
+$(".ul-content_admin ul li").click(function (e) {
   e.preventDefault();
   $(".ul-content ul li").removeClass("active");
   $(this).addClass('active');
