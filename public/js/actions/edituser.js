@@ -40,6 +40,8 @@ userDropdown.addEventListener("change", function () {
       var fadeInElement = document.getElementById("info_row");
       fadeInElement.style.display = "flex";
       fadeInElement.style.opacity = 1;
+      var resetb = document.getElementById("reset_button");
+      resetb.style.opacity = 1;
       firstname = result_.firstname;
       lastname = result_.lastname;
       email = result_.email;
@@ -82,6 +84,32 @@ $("#change_user").on("click", function () {
           title: "Error",
           text: data.message,
           icon: "error",
+        });
+      }
+    });
+});
+
+$("#reset_button").on("click", function(){
+  fetch("/reset_user_account", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId: user_id, firstname:firstname }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if(data.status == "202"){
+        Swal.fire({ 
+          title: "Success",
+          html: "Account reset succesfully<br> New credentials has been send via email",
+          icon: "success",
+        });
+      }else{
+        Swal.fire({
+          title: "Error",
+          text: data.message,
+          icon: "error"
         });
       }
     });

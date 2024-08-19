@@ -38,4 +38,4 @@ router.get("/email_temp", (req, res) => {
     res.render("pages/email_temp_1",{layout:false});
   });
 
-  module.exports = router;
+module.exports = router;

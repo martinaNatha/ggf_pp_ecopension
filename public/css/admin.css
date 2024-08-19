@@ -139,3 +139,25 @@
 .admin_contentb{
     padding: 30px 0px 30px 45px;
 }
+
+.edit_cont{
+    display: flex;
+}
+
+.reset_text{
+    height: 132px;
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+}
+
+.reset_text p{
+    font-size: 15px;
+    cursor: pointer;
+    color: rgb(0, 102, 255);
+    opacity: 0;
+}
+
+.reset_text p:hover{
+    color: rgb(0, 59, 148);
+}

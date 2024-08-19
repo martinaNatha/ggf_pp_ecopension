@@ -42,16 +42,21 @@
                     </p>
                     <div class="row">
                         <div class="col-lg-6">
-                            <div class="form-group" style="width: 40%;">
-                                <label class="label">Select user:</label>
-                                <select class="form-group select_dropdown" id="select_dropdown"
-                                    aria-label="Default select example" style="margin-top: 0;">
-                                    <option selected disabled>Select a user...</option>
-                                </select>
+                            <div class="edit_cont">
+                                <div class="form-group" style="width: 40%;">
+                                    <label class="label">Select user:</label>
+                                    <select class="form-group select_dropdown" id="select_dropdown"
+                                        aria-label="Default select example" style="margin-top: 0;">
+                                        <option selected disabled>Select a user...</option>
+                                    </select>
+                                </div>
+                                <div class="reset_text">
+                                    <p id="reset_button">Reset password...</p>
+                                </div>
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <div class="result_cont"  id="info_row">
+                            <div class="result_cont" id="info_row">
                                 <p>Firstname: <span id="firstn"></span></p>
                                 <p>Lastname: <span id="lastn"></span></p>
                                 <p>Email: <span id="emailn"></span></p>
