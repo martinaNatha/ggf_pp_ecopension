@@ -1,10 +1,11 @@
 const sql = require('mssql');
+require('dotenv').config();
 
 const config = {
-    user: 'uipath_sql',
-    password: 'TheGu@rd1an',
-    server: 'CWCURDCDBP01.GHL.INT',
-    database: 'PP_WEBPORTAL',
+    user: process.env.USERNAME_SQL,
+    password: process.env.PASSWORD_SQL,
+    server:  process.env.SERVER_SQL,
+    database:  process.env.DATABASE_SQL,
     options: {
         encrypt: true,
         trustServerCertificate: true
