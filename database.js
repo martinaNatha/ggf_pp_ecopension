@@ -3,12 +3,13 @@ const sql = require('mssql');
 const config = {
     user: 'uipath_sql',
     password: 'TheGu@rd1an',
-    server: 'CWCURDCDBP01',
+    server: 'CWCURDCDBP01.GHL.INT',
     database: 'PP_WEBPORTAL',
     options: {
         encrypt: true,
         trustServerCertificate: true
-    }
+    },
+    port: 1433
 };
 
 let pool;

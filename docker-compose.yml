@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8086:8086"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=CWCURDCDBP01
+      - DB_USER=uipath_sql
+      - DB_PASSWORD=TheGu@rd1an
+      - DB_NAME=PP_WEBPORTAL
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: PP_WEBPORTAL
+      MYSQL_USER: uipath_sql
+      MYSQL_PASSWORD: TheGu@rd1an
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:

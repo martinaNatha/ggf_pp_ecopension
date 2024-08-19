@@ -1141,6 +1141,34 @@ function send_email(email, name, username, password) {
   });
 }
 
+// const mysql = require('mysql2');
+
+// // Create a connection to the database
+// const connection = mysql.createConnection({
+//   host: "CWCURDCDBP01",
+//   user: "uipath_sql",
+//   password: 'TheGu@rd1an',
+//   database: 'PP_WEBPORTAL'
+// });
+
+// // Connect to the database
+// connection.connect((err) => {
+//   if (err) {
+//     console.error('Error connecting to the database:', err.stack);
+//     return;
+//   }
+//   console.log('Connected to the database as ID', connection.threadId);
+// });
+
+// // Example query
+// connection.query('SELECT * FROM [PP_WEBPORTAL].[dbo].[web_users]', (error, results) => {
+//   if (error) throw error;
+//   console.log('The solution is: ', results[0].solution);
+// });
+
+// // Close the connection
+// connection.end();
+
 app.use(require("./routes"));
 app.use(express.static(path.join(__dirname, "public")));
 
