@@ -59,4 +59,4 @@ function uploadFiles() {
         });
 }
 
-file1.originalname
+// file1.originalname

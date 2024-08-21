@@ -10,7 +10,7 @@ $("#log_buton").on("click", async function () {
   }).then((res) => res.json());
   console.log(result.data);
   if (result.status == "202" && result.data[0].username.startsWith("eco")) {
-    preload("/deleteaccount", result.data)
+    preload("/deleteaccounts", result.data)
     // preload("/home", result.data)
   } else if (result.status == "202" && result.data[0].username == "admineco") {
     preload("/admin_home", result.data)

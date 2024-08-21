@@ -8,13 +8,13 @@ router.get("/", (req, res) => {
   router.get("/home", (req, res) => {
     res.render("home");
   });
-router.get("/deleteaccount", (req, res) => {
+router.get("/deleteaccounts", (req, res) => {
     res.render("pages/deleteaccounts");
   });
-router.get("/resetaccount", (req, res) => {
+router.get("/resetaccounts", (req, res) => {
     res.render("pages/resetaccount");
   });
-router.get("/onboardacc", (req, res) => {
+router.get("/onboarding", (req, res) => {
     res.render("pages/onboardacc");
   });
 router.get("/check_Status", (req, res) => {
