@@ -25,7 +25,6 @@ async function get_data() {
 var userDropdown = document.getElementById("select_dropdown");
 userDropdown.addEventListener("change", function () {
   user_id = document.getElementById("select_dropdown").value;
-  console.log();
   fetch("/get_single_users", {
     method: "POST",
     headers: {
