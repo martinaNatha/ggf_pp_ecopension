@@ -16,6 +16,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const axios = require("axios");
+const odbc = require('odbc');
 
 require("dotenv").config();
 
@@ -708,6 +709,205 @@ app.post("/reset_user_account",async (req, res) =>{
   }
 });
 
+app.get("/get_info_from_compass", async (req, res) => {
+  try {
+    // Open a connection to the database
+    const connection = await odbc.connect('Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#');
+
+    // Perform a query
+    const resultmem = await connection.query('SELECT * FROM PORTAL.PTL_MEMBERS');
+    const resultcomp = await connection.query('SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG');
+
+    const total = resultmem.length + resultcomp.length;
+
+    res.json({ wn: resultmem.length.toLocaleString(), wg: resultcomp.length.toLocaleString(), t: total.toLocaleString(), datawn: resultmem});
+
+    // Close the connection
+    await connection.close();
+  } catch (error) {
+    console.error('Error connecting to the database:', error);
+  }
+});
+
+app.post("/send_to_api", async (req, res) => {
+  const resultJson = req.body;
+  var gnummer, datenow;
+
+  //get total amount of all single premium
+  const totalamount = resultJson.data.reduce((total, user) => {
+    return total + user["Single Premium"];
+  }, 0);
+
+  //find Gnummber in Compass based on the name
+  try {
+    // Open a connection to the database
+    // prod "Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#"
+    const connection = await odbc.connect(
+      "Dsn=compasstest;uid=UIPATH_ADV;pwd=XNIOEpA4JR"
+    );
+
+    // Perform a query
+    const result = await connection.query(
+      `SELECT CONT_NO FROM PORTAL.PTL_CASE_DATA WHERE PLAN_NM = '${resultJson.Employer}'`
+    );
+
+    gnummer = result[0].CONT_NO;
+    // res.json({ wn: resultmem.length, wg: resultcomp.length });
+
+    // Close the connection
+    await connection.close();
+  } catch (error) {
+    console.error("Error connecting to the database:", error);
+  }
+
+  //get date
+  function getFormattedDate() {
+    const now = new Date();
+  
+    const day = String(now.getDate()).padStart(2, '0'); // Day with leading zero
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Month with leading zero (0-indexed, so +1)
+    const year = now.getFullYear();
+  
+    const hours = String(now.getHours()).padStart(2, '0'); // Hours with leading zero
+    const minutes = String(now.getMinutes()).padStart(2, '0'); // Minutes with leading zero
+    const seconds = String(now.getSeconds()).padStart(2, '0'); // Seconds with leading zero
+    const milliseconds = String(now.getMilliseconds()).padStart(3, '0'); // Milliseconds with leading zeros
+  
+    datenow = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}:${milliseconds}`;
+  }
+  getFormattedDate();
+
+  //create the json to send to API
+  const outputJson = {
+    Mutaties: {
+      Portal_Request: [
+        {
+          CASE_KEY: gnummer,
+          UPLOAD_DT: datenow,
+          PYRL_CONTRIB_AMT: "",
+          PYRL_CONTRIB_EFF_DT: "",
+          PAYROLL_BEG_DT: "",
+          PAYROLL_END_DT: "",
+          TYP_CD: "00",
+          PORTAL_CHANGE_CD: "6",
+          SAL_RENEW_CD: "N",
+          CHNG_DT: datenow,
+          SPRM_TOTAL_AMT: totalamount,
+          Member_Request: [],
+          SINGLE_PREMIUMS: resultJson.data.map((wn) => ({
+            CASE_MBR_KEY: wn["Participant Number"],
+            SINGLE_PREMIUM: wn["Single Premium"],
+          })),
+          Miscellaneous_Request: {
+            CASE_MBR_KEY: "",
+            PEND_MBR_REF_ID: "",
+            NATLIDNO: "",
+            PYRL_NO: "",
+            CHNG_TYP_CD: "",
+            CHNG_AMT: "",
+            CHNG_DT: "",
+            CHNG_DATA: "",
+            CHNG_PCT: "",
+            CHNG_EXIT_REAS_CD: "",
+            CHNG_EXIT_DT: "",
+            SPOUSAL_CNT: "",
+            DEPENDENT_CNT: "",
+            BIRTH_DT_DEPENDENT: "",
+            BIRTH_COUNTRY_CD: "",
+            ADDR_LINE1: "",
+            ADDR_LINE2: "",
+            ADDR_LINE3: "",
+            ADDR_CITY: "",
+            ADDR_POST_CD: "",
+            ADDR_COUNTRY_TXT: "",
+            ADDR_COUNTRY_CD: "",
+            ADDR_EMAIL: "",
+            PHONE: "",
+            NATIONALITY_CD: "",
+            MBGP_KEY: "",
+            MBGC_KEY: "",
+            files: {
+              id: "",
+              id_partner: "",
+              health_form: "",
+              birth_certificate: "",
+            },
+          },
+          Payroll_Request: {
+            MBR_TYP_CD: "",
+            MBGC_KEY: "",
+            PYRL_NO: "",
+            CASE_MBR_KEY: "",
+            PEND_MBR_REF_ID: "",
+            NATLIDNO: "",
+            BIRTHDT: "",
+            CHNG_DT: "",
+            JOIN_SCH_DT: "",
+            JOIN_COMP_DT: "",
+            FIRSTNAME: "",
+            LASTNAM: "",
+            MIDNAME: "",
+            NAMEPREFIX: "",
+            NAMESUFFIX: "",
+            ANN_SAL_AMT: "",
+            SAL_EFF_DT: "",
+            PART_TIME_PCT: "",
+            SEXCD: "",
+            SPOUSAL_CNT: "",
+            DEPENDENT_CNT: "",
+          },
+        },
+      ],
+      Aantal_Mutaties: "1",
+    },
+  };
+
+  console.log(outputJson);
+  getTokenAndSendRequest(outputJson)
+  res.json({status:"202"})
+  //send json to API
+  async function getTokenAndSendRequest(output) {
+    try {
+      // First POST request to get the token with basic auth
+      const auth = {
+        username: 'h3tMbOEy-iA305q-H7muYg..',
+        password: 'PggJQEGXFwMvgDEJtMUQ0w..',
+      };
+  
+      const tokenResponse = await axios.post(
+        'http://200.16.93.41:8080/portal/ptl/oauth/token',
+        qs.stringify({
+          grant_type: 'client_credentials',
+        }),
+        {
+          auth, // Basic authentication
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
+  
+      // Extract the token from the response
+      const token = tokenResponse.data.access_token;
+      console.log('Token received:', token);
+  
+      const response = await axios.post(
+        'http://200.16.93.41:8080/portal/ptl/inpension/transaction', // Replace with actual endpoint
+        output,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add token in Authorization header
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      res.json({status:"202", data:response.data})
+    } catch (error) {
+      console.error('Error:', error.response ? error.response.data : error.message);
+    }
+  }
+});
+
 function moveFiles(srcFilePath, destDirPath, fileName) {
   const destFilePath = path.join(destDirPath, fileName);
 
@@ -749,10 +949,7 @@ function checkNetworkPath(path, callback) {
 
 const upload = multer({ dest: "uploads/" });
 
-app.post(
-  "/upload",
-  upload.fields([{ name: "file1" }, { name: "file2" }]),
-  (req, res) => {
+app.post( "/upload",upload.fields([{ name: "file1" }, { name: "file2" }]),(req, res) => {
     const file1 = req.files["file1"] ? req.files["file1"][0] : null;
     const file2 = req.files["file2"] ? req.files["file2"][0] : null;
 
@@ -796,7 +993,7 @@ app.post(
           "",
           "Onboarding"
         );
-
+        send_onboard_mail(req.body.username);
         res.status(202).json({ status: "202", msg: successMessage });
       } else {
         res.status(404).json({
@@ -1483,6 +1680,232 @@ function send_reseted_mail(new_p, mail){
 
 
     <textarea id="edCb" style="position: absolute; top: 0px; left: 0px; width: 0px; height: 0px; display: none;"></textarea>
+
+
+
+
+
+
+
+
+</body>
+
+</html>`,
+  };
+
+  // Send the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log(error);
+    }
+    console.log("Message sent: %s", info.messageId);
+  });
+}
+function send_onboard_mail(user){
+  let transporter = nodemailer.createTransport({
+    host: "smtp.sendgrid.net",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "apikey",
+      pass: process.env.EMAIL_P,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+
+  let mailOptions = {
+    from: "Ecopension <ggf_internal@myguardiangroup.com>",
+    to: 'nathaniel.martina@myguardiangroup.com, sherwayne.celestina@myguardiangroup.com',
+    subject: "Onboarding Ecopension",
+    html: `<!DOCTYPE html>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
+
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: inherit !important;
+        }
+
+        #MessageViewBody a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        p {
+            line-height: inherit
+        }
+
+        .desktop_hide,
+        .desktop_hide table {
+            mso-hide: all;
+            display: none;
+            max-height: 0px;
+            overflow: hidden;
+        }
+
+        .image_block img+div {
+            display: none;
+        }
+
+        @media (max-width:655px) {
+
+            .desktop_hide table.icons-inner,
+            .social_block.desktop_hide .social-table {
+                display: inline-block !important;
+            }
+
+            .icons-inner {
+                text-align: center;
+            }
+
+            .icons-inner td {
+                margin: 0 auto;
+            }
+
+            .mobile_hide {
+                display: none;
+            }
+
+            .row-content {
+                width: 100% !important;
+            }
+
+            .stack .column {
+                width: 100%;
+                display: block;
+            }
+
+            .mobile_hide {
+                min-height: 0;
+                max-height: 0;
+                max-width: 0;
+                overflow: hidden;
+                font-size: 0px;
+            }
+
+            .desktop_hide,
+            .desktop_hide table {
+                display: table !important;
+                max-height: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="body" style="margin: 0; background-color: #f1f1f1; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
+    <table class="nl-container" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f1f1f1;">
+        <tbody>
+            <tr>
+                <td>
+                    <table class="row row-1" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f1f1f1; color: #000000; width: 635px; margin: 0 auto;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+                                                    <div class="spacer_block block-1" style="height:20px;line-height:20px;font-size:1px;"> </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="row row-2" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt;mso-table-rspace: 0pt;background-color: #ffffff;color: #000000;width: 635px;margin: 0 auto;background: #2C0845;height: 48px;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 15px; padding-top: 15px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="row row-3" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #ffffff; color: #000000; width: 635px; margin: 0 650px;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" style="/* width: 100%; */mso-table-lspace: 0pt;mso-table-rspace: 0pt;font-weight: 400;text-align: left;/* padding-bottom: 5px; *//* padding-bottom: 5px; *//* padding-left: 28px; *//* padding-top: 10px; */vertical-align: top;border-top: 0px;border-right: 0px;border-bottom: 0px;border-left: 0px;padding: 45px;">
+                                                    
+                                                    <table class="paragraph_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td class="pad" style="padding-bottom:10px;padding-top:10px;">
+                                                                    <div style="color:#000000;font-family:Poppins, Arial, Helvetica, sans-serif;font-size:25px;line-height:120%;text-align:left;mso-line-height-alt:36px;">
+                                                                        <p style="margin: 0; word-break: break-word;">
+                                                                            <span><strong>Hi,</strong></span>
+                                                                        </p>
+                                                                        <p style="font-size: 16px;margin-bottom:0;line-height: 25px;">${user} has onboarded today, please monitor the onboarding process tomorrow.</p>
+                                                                        <br>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="row row-4" align="center" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="row-content stack" align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #f1f1f1; color: #000000; width: 635px; margin: 0 auto;" width="635">
+                                        <tbody>
+                                            <tr>
+                                                <td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 15px; padding-top: 15px; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+                                                    <div class="spacer_block block-1" style="height:20px;line-height:20px;font-size:1px;"> </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                </td>
+            </tr>
+        </tbody>
+    </table><!-- End -->
+
+
+    <textarea id="edCb" style="position: absolute; top: 0px; left: 0px; width: 0px; height: 0px; display: none;"></textarea>
+
+
 
 
 

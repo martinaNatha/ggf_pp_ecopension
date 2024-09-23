@@ -46,6 +46,9 @@ if (activePage) {
     console.log(activePage.replace(/\//g, ''))
     const side_link = $(this).text().trim().toLowerCase().replace(/\s+/g, '');
     const page = activePage.replace(/\//g, '');
+
+    console.log(side_link)
+    console.log(page)
     if (side_link === page) {
       $(this).addClass("active");
     }
@@ -81,7 +84,9 @@ $(".ul-content ul li").click(function (e) {
     window.location.replace("/onboarding");
   } else if ($(this).text() == "Wn status") {
     window.location.replace("/check_Status");
-  } else {
+  } else if ($(this).text() == "Upload list") {
+    window.location.replace("/uploadlist");
+  }  else {
     window.location.replace("/home");
   }
 });

@@ -1,107 +1,74 @@
+<script src="./js/ecohome.js"></script>
 <div class="content">
     <header class="header">
         <p class="hp">Ecopension / Home page</p>
         <p class="hp1">Welcome to ecopension</p>
-        <div class="info_contents">
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="card" style="width: 19rem;">
-                        <div class="card-body" style="padding: 30px !important;">
-                            <div class="card_content">
-                                <h1>25,265</h1>
-                                <p>Number of wn contracts</p>
-                                <h5>WN Contracts</h5>
-                            </div>
+        {{!-- <h1 class="header_t">Pension Web-Portal</h1> --}}
+    </header>
+    <div class="eco_content" id="eco_content">
+    <div class="info_contents">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card" style="width: 19rem;">
+                    <div class="card-body" style="padding: 30px !important;">
+                        <div class="card_content">
+                            <h1 id="wn"></h1>
+                            <p>Number of wn contracts</p>
+                            <h5>WN Contracts</h5>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3">
-                    <div class="card" style="width: 19rem;">
-                        <div class="card-body" style="padding: 30px !important;">
-                            <div class="card_content">
-                                <h1>2,523</h1>
-                                <p>Number of wg contracts</p>
-                                <h5>WG Contracts</h5>
-                            </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card" style="width: 19rem;">
+                    <div class="card-body" style="padding: 30px !important;">
+                        <div class="card_content">
+                            <h1 id="wg"></h1>
+                            <p>Number of wg contracts</p>
+                            <h5>WG Contracts</h5>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3">
-                    <div class="card" style="width: 19rem;">
-                        <div class="card-body" style="padding: 30px !important;">
-                            <div class="card_content">
-                                <h1>125,154</h1>
-                                <p>Number of active members</p>
-                                <h5>Active Members</h5>
-                            </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card" style="width: 19rem;">
+                    <div class="card-body" style="padding: 30px !important;">
+                        <div class="card_content">
+                            <h1 id="wnwg"></h1>
+                            <p>Number of active members</p>
+                            <h5>Active Members</h5>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        {{!-- <h1 class="header_t">Pension Web-Portal</h1> --}}
-    </header>
+    </div>
     <div class="table_content">
         <div class="card">
             <div class="card-body">
-                <table class="table table-bordered table-hover dt-responsive homt_tb" id="tbl_home"
+                <table class="table table-bordered table-hover dt-responsive homt_tb" id="tbl_eco_user"
                     style="width: 100%;">
                     <thead class="table_h">
                         <tr>
-                            <th>Country</th>
-                            <th>Languages</th>
-                            <th>Population</th>
-                            <th>Median Age</th>
-                            <th>Area (Km²)</th>
+                            <th>MBR_NO</th>
+                            <th>CASE_MBR_KEY</th>
+                            <th>NAMEID</th>
+                            <th>NATLIDNO</th>
+                            <th>FIRSTNAME</th>
+                            <th>LASTNAME</th>
+                            <th>EXTD_MBR_STATUS</th>
+                            <th>ORG_NAMEID</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Argentina</td>
-                            <td>Spanish (official), English, Italian, German, French</td>
-                            <td>41,803,125</td>
-                            <td>31.3</td>
-                            <td>2,780,387</td>
-                        </tr>
-                        <tr>
-                            <td>Australia</td>
-                            <td>English 79%, native and other languages</td>
-                            <td>23,630,169</td>
-                            <td>37.3</td>
-                            <td>7,739,983</td>
-                        </tr>
-                        <tr>
-                            <td>Greece</td>
-                            <td>Greek 99% (official), English, French</td>
-                            <td>11,128,404</td>
-                            <td>43.2</td>
-                            <td>131,956</td>
-                        </tr>
-                        <tr>
-                            <td>Luxembourg</td>
-                            <td>Luxermbourgish (national) French, German (both administrative)</td>
-                            <td>536,761</td>
-                            <td>39.1</td>
-                            <td>2,586</td>
-                        </tr>
-                        <tr>
-                            <td>Russia</td>
-                            <td>Russian, others</td>
-                            <td>142,467,651</td>
-                            <td>38.4</td>
-                            <td>17,076,310</td>
-                        </tr>
-                        <tr>
-                            <td>Sweden</td>
-                            <td>Swedish, small Sami- and Finnish-speaking minorities</td>
-                            <td>9,631,261</td>
-                            <td>41.1</td>
-                            <td>449,954</td>
-                        </tr>
-                    </tbody>
                 </table>
             </div>
         </div>
     </div>
+    </div>
+    <div class="info_loader" id="info_loader">
+    <div class="loader-0">
+        <div class="loader-03"></div>
+    </div>
+</div>
 </div>
 

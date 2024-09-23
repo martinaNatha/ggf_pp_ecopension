@@ -18,6 +18,13 @@ async function get_data() {
   });
 }
 
+$.get("/get_info_from_compass", function (result) {
+  var result_data = result.data;
+  document.getElementById("wnnum").innerText = result.wn;
+  document.getElementById("wgnum").innerText = result.wg;
+  document.getElementById("wtotal").innerText = result.t;
+});
+
 
 
 

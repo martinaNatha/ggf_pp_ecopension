@@ -29,6 +29,7 @@ function uploadFiles() {
     const formData = new FormData(form);
 
     formData.append('username', user_name);
+    formData.append('email', email);
 
     fetch('/upload', {
         method: 'POST',

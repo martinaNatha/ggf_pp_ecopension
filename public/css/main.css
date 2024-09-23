@@ -476,9 +476,13 @@ nav {
     font-size: 1.2em;
 }
 
+.eco_content{
+    display: none;
+}
+
 /* home section */
 .info_contents {
-    padding-bottom: 40px;
+    padding: 10px 48px;
 }
 
 .card {
@@ -587,6 +591,68 @@ nav {
     animation: 1.5s loader-01 linear infinite;
 }
 
+.custom-excel-button {
+    background: #ffffff00 !important; /* Green background */
+    color: white !important; /* White text */
+    border: none !important;
+    padding: 0px 0px 0px 10px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    height: 30px;
+}
+
+.custom-excel-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+.custom-excel-button img {
+    margin-right: 5px; /* Add space between image and text */
+}
+
+.fa-file-excel{
+    color: #1D6C40;
+}
+
+.fa-print{
+    color: #24527a;
+}
+
+.fa-file-excel:hover{
+    transform: scale(1.2);
+    color: #2a975b;
+}
+
+.fa-print:hover{
+    transform: scale(1.2);
+    color: #2f6a9e;
+}
+
+[class*="loader-"] {
+    display: inline-block;
+    width: 2.5em;
+    height: 2.5em;
+    color: inherit;
+    vertical-align: middle;
+    pointer-events: none;
+}
+
+.loader-03 {
+    border: 0.2em solid currentcolor;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: 1s loader-03 linear infinite;
+    position: relative;
+}
+
+.info_loader{
+    width: 100%;
+    height: 80%;
+    display: flex;
+    opacity: 1;
+    justify-content: center;
+    align-items: center;
+}
+
 @keyframes loader-01 {
     0% {
         transform: rotate(0deg);
@@ -673,4 +739,12 @@ nav {
         text-align: center;
         float: none;
     }
+}
+@keyframes loader-03 {
+    0% {
+        transform: rotate(0deg);
+   }
+    100% {
+        transform: rotate(360deg);
+   }
 }

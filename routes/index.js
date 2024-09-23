@@ -9,16 +9,19 @@ router.get("/", (req, res) => {
     res.render("home");
   });
 router.get("/deleteaccounts", (req, res) => {
-    res.render("pages/deleteaccounts");
+    res.render("pages/users/deleteaccounts");
   });
 router.get("/resetaccounts", (req, res) => {
-    res.render("pages/resetaccount");
+    res.render("pages/users/resetaccount");
   });
 router.get("/onboarding", (req, res) => {
-    res.render("pages/onboardacc");
+    res.render("pages/users/onboardacc");
   });
 router.get("/check_Status", (req, res) => {
-    res.render("pages/check_Status");
+    res.render("pages/users/check_Status");
+  });
+router.get("/uploadlist", (req, res) => {
+    res.render("pages/users/koopsome");
   });
 
 router.get("/admin_home", (req, res) => {
@@ -35,7 +38,7 @@ router.get("/useractivity", (req, res) => {
   });
 
 router.get("/email_temp", (req, res) => {
-    res.render("pages/email_temp_1",{layout:false});
+    res.render("pages/email_temp/email_temp_onboard",{layout:false});
   });
 
 module.exports = router;
