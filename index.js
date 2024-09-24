@@ -1221,7 +1221,7 @@ function send_email_new_cred(email, name, username, password) {
                                                                             Username: <strong>${username}</strong>        Password: <strong>${password}</strong>
                                                                         </p>
                                                                         <p style="font-size: 16px;margin-top:20px;margin-bottom:0;line-height: 25px;">
-                                                                           Web-portal url: 
+                                                                           Web-portal url: http://cwftmwebdev01.ghl.int:8086/
                                                                         </p>
                                                                     </div>
                                                                 </td>

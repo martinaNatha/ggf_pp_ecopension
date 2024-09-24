@@ -113,7 +113,7 @@
     background: #76429b0c;
 }
 
-.ul-content_adminul li:hover p {
+.ul-content_admin ul li:hover p {
     transform: translate(15px);
 }
 
