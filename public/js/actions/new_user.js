@@ -31,6 +31,7 @@ $("#new_sub").on("click", function () {
   var firstname = document.getElementById("firstname").value;
   var lastname = document.getElementById("lastname").value;
   var email = document.getElementById("email").value;
+  var level = document.getElementById("auth_level").value;
 
   if (firstname == "" || firstname == null) {
     document.getElementById("fver").style.display = "block";
@@ -44,14 +45,21 @@ $("#new_sub").on("click", function () {
     document.getElementById("lastname").classList.add("error");
   }
 
+  if (level == "" || level == null) {
+    document.getElementById("auth_msg").style.display = "block";
+    document.getElementById("auth_level").style.border = "1px solid red";
+    document.getElementById("auth_level").classList.add("error");
+  }
+
   if (email == "" || email == null) {
     document.getElementById("emver").style.display = "block";
     document.getElementById("email").style.border = "1px solid red";
     document.getElementById("email").classList.add("error");
   } else {
-    store_new_user(firstname, lastname, email);
+    store_new_user(firstname, lastname, email, level);
   }
 });
+
 $("#firstname").on("change", function () {
   if (this.classList.contains("error")) {
     document.getElementById("fver").style.display = "none";
@@ -70,15 +78,22 @@ $("#email").on("change", function () {
     document.getElementById("email").style.border = "1px solid green";
   }
 });
+$("#auth_level").on("change", function () {
+  if (this.classList.contains("error")) {
+    document.getElementById("auth_msg").style.display = "none";
+    document.getElementById("auth_level").style.border = "1px solid green";
+  }
+});
 
 // store new user
-async function store_new_user(firstname, lastname, email) {
+async function store_new_user(firstname, lastname, email,level) {
   event.preventDefault();
 
   var data_info = {
     firstname,
     lastname,
     email,
+    level
   };
   const result = await fetch("/add_new_user", {
     method: "POST",

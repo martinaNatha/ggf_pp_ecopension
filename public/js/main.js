@@ -5,15 +5,42 @@ var jsonData;
 
 var user_name;
 var email;
+var tokenUser;
+
+
+(async function () {
+  getUserInfo();
+  console.log(tokenUser.auth_level)
+  if(tokenUser.auth_level == '2'){
+    document.querySelector('.homet').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(2)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(3)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(4)').style.display = 'flex';
+    document.querySelector('.onboardt').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(6)').style.display = 'flex';
+    document.querySelector('.koopt').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(8)').style.display = 'flex';
+  }else if(tokenUser.auth_level == '3'){
+    document.querySelector('.homet').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(2)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(3)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(4)').style.display = 'flex';
+    document.querySelector('.onboardt').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(6)').style.display = 'flex';
+  }else if(tokenUser.auth_level == '4'){
+    document.querySelector('.koopt').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(8)').style.display = 'flex';
+  }
+})();
+
 function getUserInfo() {
   var tokenEncrypt = sessionStorage.getItem("tokenusers");
-  var tokenUser = JSON.parse(tokenEncrypt);
+  tokenUser = JSON.parse(tokenEncrypt);
   user_name = tokenUser.firstname + " " + tokenUser.lastname;
   email = tokenUser.email;
   document.getElementById("userName").innerText = user_name;
   document.getElementById("usName").innerText = "@" + tokenUser.username;
 }
-getUserInfo();
 
 $("#logout").on("click", async function () {
   console.log("logout");
@@ -43,12 +70,12 @@ const activePage = window.location.pathname;
 if (activePage) {
   $(".ul-content ul li").each(function () {
     // Trim whitespace and compare in a case-insensitive way
-    console.log(activePage.replace(/\//g, ''))
+    // console.log(activePage.replace(/\//g, ''))
     const side_link = $(this).text().trim().toLowerCase().replace(/\s+/g, '');
     const page = activePage.replace(/\//g, '');
 
-    console.log(side_link)
-    console.log(page)
+    // console.log(side_link)
+    // console.log(page)
     if (side_link === page) {
       $(this).addClass("active");
     }

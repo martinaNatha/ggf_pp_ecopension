@@ -17,6 +17,7 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const axios = require("axios");
 const odbc = require('odbc');
+const qs = require('qs');
 
 require("dotenv").config();
 
@@ -452,7 +453,7 @@ app.post("/send_reseted_info", (req, res) => {
 });
 
 app.post("/add_new_user", async (req, res) => {
-  const { firstname, lastname, email } = req.body;
+  const { firstname, lastname, email, level} = req.body;
   const fullname = firstname + " " + lastname;
   const username =
     "eco" + firstname.substring(0, 4) + Math.floor(Math.random() * 1000);
@@ -477,7 +478,7 @@ app.post("/add_new_user", async (req, res) => {
     request.input("firstname", sql.VarChar, firstname);
     request.input("lastname", sql.VarChar, lastname);
     request.input("email", sql.VarChar, email);
-    request.input("secret", sql.VarChar, secret.toString());
+    request.input("auth_level", sql.VarChar, level);
 
     // Check if user already exists
     const checkUserQuery = `
@@ -499,8 +500,8 @@ app.post("/add_new_user", async (req, res) => {
 
       // Insert the new user with the hashed password
       const insertQuery = `
-        INSERT INTO web_users(username, password, firstname, lastname, email)
-        VALUES (@username, @password, @firstname, @lastname, @email)
+        INSERT INTO web_users(username, password, firstname, lastname, email, auth_level)
+        VALUES (@username, @password, @firstname, @lastname, @email, @auth_level)
       `;
       await request.query(insertQuery);
 
@@ -715,7 +716,7 @@ app.get("/get_info_from_compass", async (req, res) => {
     const connection = await odbc.connect('Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#');
 
     // Perform a query
-    const resultmem = await connection.query('SELECT * FROM PORTAL.PTL_MEMBERS');
+    const resultmem = await connection.query('SELECT * FROM PORTAL.PTL_MEMBERS order by JOIN_SCHEME_DT desc');
     const resultcomp = await connection.query('SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG');
 
     const total = resultmem.length + resultcomp.length;
@@ -730,11 +731,12 @@ app.get("/get_info_from_compass", async (req, res) => {
 });
 
 app.post("/send_to_api", async (req, res) => {
-  const resultJson = req.body;
+  const {jresult, username} = req.body;
+  const json_data = JSON.parse(jresult);
   var gnummer, datenow;
 
-  //get total amount of all single premium
-  const totalamount = resultJson.data.reduce((total, user) => {
+  //get total amount of all Koopsom
+  var totalamount = json_data.data.reduce((total, user) => {
     return total + user["Single Premium"];
   }, 0);
 
@@ -748,7 +750,7 @@ app.post("/send_to_api", async (req, res) => {
 
     // Perform a query
     const result = await connection.query(
-      `SELECT CONT_NO FROM PORTAL.PTL_CASE_DATA WHERE PLAN_NM = '${resultJson.Employer}'`
+      `SELECT CONT_NO FROM PORTAL.PTL_CASE_DATA WHERE PLAN_NM = '${json_data.Employer}'`
     );
 
     gnummer = result[0].CONT_NO;
@@ -794,7 +796,7 @@ app.post("/send_to_api", async (req, res) => {
           CHNG_DT: datenow,
           SPRM_TOTAL_AMT: totalamount,
           Member_Request: [],
-          SINGLE_PREMIUMS: resultJson.data.map((wn) => ({
+          SINGLE_PREMIUMS: json_data.data.map((wn) => ({
             CASE_MBR_KEY: wn["Participant Number"],
             SINGLE_PREMIUM: wn["Single Premium"],
           })),
@@ -863,8 +865,10 @@ app.post("/send_to_api", async (req, res) => {
   };
 
   console.log(outputJson);
-  getTokenAndSendRequest(outputJson)
-  res.json({status:"202"})
+  
+  store_data(gnummer,username, "", totalamount, "Koopsome");
+  getTokenAndSendRequest(outputJson);
+  // res.json({status:"202"})
   //send json to API
   async function getTokenAndSendRequest(output) {
     try {
@@ -901,7 +905,7 @@ app.post("/send_to_api", async (req, res) => {
           },
         }
       );
-      res.json({status:"202", data:response.data})
+      res.json({status:"202", data:response.data});
     } catch (error) {
       console.error('Error:', error.response ? error.response.data : error.message);
     }
@@ -1018,7 +1022,7 @@ async function store_data(info, name_u, type, Aamount, action) {
     request.input("info", sql.Text, JSON.stringify(info)); // Use appropriate type for large text
 
     const result = await request.query(
-      `INSERT INTO user_action_logs (users, amount_anumber, type, actions, json_data) 
+      `INSERT INTO user_action_logs (users, amount_anumber, type, actions, data) 
        VALUES (@name_u, @Aamount, @type, @action, @info)`
     );
   } catch (err) {
@@ -1701,6 +1705,7 @@ function send_reseted_mail(new_p, mail){
     console.log("Message sent: %s", info.messageId);
   });
 }
+
 function send_onboard_mail(user){
   let transporter = nodemailer.createTransport({
     host: "smtp.sendgrid.net",

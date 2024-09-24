@@ -140,13 +140,13 @@ nav {
 }
 
 .ul-content ul li {
-    display: flex;
+    display: none;
     cursor: pointer;
     padding: 12px 48px;
 }
 
 .side_p {
-    display: flex;
+    display: none;
     cursor: pointer;
     padding-left: 50px;
     margin-bottom: 1px;

@@ -9,7 +9,6 @@ $.get("/get_info_from_compass", function (result) {
   document.getElementById("wn").innerText = result.wn;
   document.getElementById("wg").innerText = result.wg;
   document.getElementById("wnwg").innerText = result.t;
-  console.log(result.datawn);
   $("#tbl_eco_user").DataTable({
     data: result.datawn,
     columns: [

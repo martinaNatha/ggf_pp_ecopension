@@ -11,14 +11,14 @@
         <div class="row" style="margin-right: 0;">
             <div class="ul-content_admin" id="admin_ul">
                 <ul>
-                    <p class="side_p">Account Actions</p>
+                    <p class="side_ph">Account Actions</p>
                     <li class="side_li1 "><i class="fa-solid fa-house"></i><p>Home Page</p></li>
                     <li class="side_li2 active"><i class="fa-solid fa-user-xmark"></i><p>Add New User</p></li>
                     <li class="side_li2"><i class="fa-solid fa-pen-to-square"></i><p>Edit User</p></li>
                     {{!-- <li class="side_li3"><i class="fa-solid fa-spinner"></i>
                         <p>Reset Accounts</p>
                     </li> --}}
-                    <p class="side_p" style="padding-top: 20px;">Logs</p>
+                    <p class="side_ph" style="padding-top: 20px;">Logs</p>
                     <li class="side_li4"><i class="fa-solid fa-file-export"></i><p>User Activity</p></li>
                     {{!-- <p class="side_p" style="padding-top: 20px;">Get user information</p> --}}
                     {{!-- <li class="side_li5"><i class="fa-regular fa-solid fa-chart-bar"></i>
@@ -43,7 +43,7 @@
                             password.
                         </p>
                         <div class="row">
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="label">First name:</label>
                                     <input type="text" class="form-control input_field" id="firstname"
@@ -52,7 +52,7 @@
                                         name</p>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
+                            <div class="col-lg-3">
                                 <div class="form-group">
                                     <label class="label">Last name:</label>
                                     <input type="text" class="form-control input_field" id="lastname"
@@ -67,6 +67,19 @@
                                     <input type="email" class="form-control input_field" id="email" placeholder="Email">
                                     <p style="color:red; font-size:12px;display:none;" id="emver">Please enter a first
                                         name</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="form-group" >
+                                    <label class="label">Level:</label>
+                                    <select class="form-group select_dropdown" style="margin-top: 0;margin-bottom: 0;" id="auth_level"
+                                        aria-label="Default select example">
+                                        <option value="" selected disabled>Level...</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                    </select>
+                                     <p style="color:red; font-size:12px;display:none;margin-top:0;" id="auth_msg">Enter a level...</p>
                                 </div>
                             </div>
                         </div>

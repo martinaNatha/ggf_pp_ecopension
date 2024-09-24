@@ -25,6 +25,10 @@
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <!-- Load Chart.js Moment.js adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+
     <script src="https://cdn.datatables.net/buttons/3.1.0/js/dataTables.buttons.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.0/js/buttons.dataTables.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -51,14 +55,14 @@
                 <div class="row" style="margin-right: 0;">
                     <div class="ul-content" id="user_url_side">
                         <ul>
-                            <p class="side_p">Account Actions</p>
+                            <p class="side_p homet">Account Actions</p>
                             <li class="side_li1"><i class="fa-solid fa-house"></i><p>Home</p></li>
-                            <li class="side_li2"><i class="fa-solid fa-user-xmark"></i><p>Delete Accounts</p></li>
-                            <li class="side_li3"><i class="fa-solid fa-spinner"></i><p>Reset Accounts</p></li>
-                            <p class="side_p" style="padding-top: 20px;">Onboarding account</p>
-                            <li class="side_li4"><i class="fa-solid fa-file-export"></i><p>Onboarding</p></li>
-                            <p class="side_p" style="padding-top: 20px;">GL Transfer Values </p>
-                            <li class="side_li4"><i class="fa-solid fa-file-export"></i><p>Upload list</p></li>
+                            <li class="side_li2" id="side_li2"><i class="fa-solid fa-user-xmark"></i><p>Delete Accounts</p></li>
+                            <li class="side_li3"  id="side_li3"><i class="fa-solid fa-spinner"></i><p>Reset Accounts</p></li>
+                            <p class="side_p onboardt" style="padding-top: 20px;">Onboarding account</p>
+                            <li class="side_li4" id="side_li4"><i class="fa-solid fa-file-export"></i><p>Onboarding</p></li>
+                            <p class="side_p koopt" style="padding-top: 20px;">GL Transfer Values </p>
+                            <li class="side_li5"><i class="fa-solid fa-file-export"></i><p>Upload list</p></li>
                             {{!-- <p class="side_p" style="padding-top: 20px;">Get user information</p>
                             <li class="side_li5"><i class="fa-regular fa-solid fa-chart-bar"></i><p>Wn status</p></li> --}}
                         </ul>

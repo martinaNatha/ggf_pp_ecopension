@@ -16,7 +16,7 @@ async function user_action() {
         { data: "type" },
         { data: "actions" },
         { data: "amount_anumber" },
-        { data: "json_data" },
+        { data: "data" },
       ],
       order: [[0, "desc"]],
       columnDefs: [
@@ -60,7 +60,7 @@ async function user_action() {
       $("#modal-type").text(rowData.type);
       $("#modal-actions").text(rowData.actions);
       $("#modal-amount_anumber").text(rowData.amount_anumber);
-      $("#modal-json_data").text(JSON.stringify(rowData.json_data, null, 2)); // Beautify JSON data
+      $("#modal-json_data").text(rowData.data); // Beautify JSON data
 
       // Show modal with fade-in effect
       var modal = $("#infoModal");

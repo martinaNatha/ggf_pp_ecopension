@@ -10,7 +10,11 @@ $("#log_buton").on("click", async function () {
   }).then((res) => res.json());
   console.log(result.data);
   if (result.status == "202" && result.data[0].username.startsWith("eco")) {
-    preload("/home", result.data)
+    if(result.data[0].auth_level == '4'){
+      preload("/uploadlist", result.data)
+    }else{
+      preload("/home", result.data)
+    }
     // preload("/home", result.data)
   } else if (result.status == "202" && result.data[0].username == "admineco") {
     preload("/admin_home", result.data)

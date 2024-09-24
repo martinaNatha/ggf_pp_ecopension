@@ -91,9 +91,17 @@ document.getElementById("sub_button").addEventListener("click", function () {
   for (let i = 3; i < sheetData.length; i++) {
     const rowData = {};
     headers.forEach((header, index) => {
-      rowData[header] = sheetData[i][index];
+      const cellValue = sheetData[i][index];
+      // Check if the value is not empty, null, or undefined
+      if (cellValue !== undefined && cellValue !== null && cellValue !== "") {
+        rowData[header] = cellValue;
+      }
     });
-    dataRows.push(rowData);
+
+    // Only push non-empty rowData
+    if (Object.keys(rowData).length > 0) {
+      dataRows.push(rowData);
+    }
   }
 
   // Create JSON object
@@ -103,20 +111,26 @@ document.getElementById("sub_button").addEventListener("click", function () {
   };
 
   // Display the value from C1 and the JSON data
-//   console.log(JSON.stringify(resultJson, null, 2));
+  // console.log(JSON.stringify(resultJson, null, 2));
   send_data();
 });
 
 async function send_data() {
     console.log(resultJson)
+
+    const data ={
+      jresult : JSON.stringify(resultJson),
+      username: user_name,
+    }
+    console.log(data)
   const result = await fetch("/send_to_api", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(resultJson),
+    body: JSON.stringify(data),
   }).then((res) => res.json());
-  console.log(result.data)
+  console.log(result.data);
   if(result.status == "202"){
     const box = document.getElementById("msg_cont")
     box.style.display= "flex";
