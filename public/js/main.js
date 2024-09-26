@@ -34,26 +34,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 (async function () {
   getUserInfo();
-  console.log(tokenUser.auth_level)
   if(tokenUser.auth_level == '2'){
     document.querySelector('.homet').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(2)').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(3)').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(4)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(5)').style.display = 'flex';
     document.querySelector('.onboardt').style.display = 'flex';
-    document.querySelector('.ul-content ul li:nth-child(6)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(7)').style.display = 'flex';
     document.querySelector('.koopt').style.display = 'flex';
-    document.querySelector('.ul-content ul li:nth-child(8)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(9)').style.display = 'flex';
   }else if(tokenUser.auth_level == '3'){
     document.querySelector('.homet').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(2)').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(3)').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(4)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(5)').style.display = 'flex';
     document.querySelector('.onboardt').style.display = 'flex';
-    document.querySelector('.ul-content ul li:nth-child(6)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(7)').style.display = 'flex';
   }else if(tokenUser.auth_level == '4'){
     document.querySelector('.koopt').style.display = 'flex';
-    document.querySelector('.ul-content ul li:nth-child(8)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(9)').style.display = 'flex';
   }
 })();
 
@@ -99,6 +100,7 @@ if (activePage) {
     const page = activePage.replace(/\//g, '');
 
     // console.log(side_link)
+    // console.log("----------------")
     // console.log(page)
     if (side_link === page) {
       $(this).addClass("active");
@@ -137,7 +139,9 @@ $(".ul-content ul li").click(function (e) {
     window.location.replace("/check_Status");
   } else if ($(this).text() == "Upload list") {
     window.location.replace("/uploadlist");
-  }  else {
+  }else if ($(this).text() == "Get Account Info") {
+    window.location.replace("/getaccountinfo");
+  }else {
     window.location.replace("/home");
   }
 });

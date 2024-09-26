@@ -34,83 +34,102 @@
             <p class="hp1">Add New User</p>
         </header>
         <div class="admin_herser2">
-
-            <div class="admin_card">
-                <div class="card" style="padding: 25px;">
-                    <div class="card-body">
-                        <H4>Add new user</H4>
-                        <p>After submiting the request, an email will be send to the user with the username and
-                            password.
-                        </p>
-                        <div class="row">
-                            <div class="col-lg-3">
-                                <div class="form-group">
-                                    <label class="label">First name:</label>
-                                    <input type="text" class="form-control input_field" id="firstname"
-                                        placeholder="Firstname">
-                                    <p style="color:red; font-size:12px;display:none;" id="fver">Please enter a first
-                                        name</p>
+            <div class="row">
+                <div class="col-lg-9">
+                    <div class="admin_card">
+                        <div class="card" style="padding: 25px;">
+                            <div class="card-body">
+                                <H4>Add new user</H4>
+                                <p>After submiting the request, an email will be send to the user with the username and
+                                    password.
+                                </p>
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label class="label">First name:</label>
+                                            <input type="text" class="form-control input_field" id="firstname"
+                                                placeholder="Firstname">
+                                            <p style="color:red; font-size:12px;display:none;" id="fver">Please enter a
+                                                first
+                                                name</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label class="label">Last name:</label>
+                                            <input type="text" class="form-control input_field" id="lastname"
+                                                placeholder="Last name">
+                                            <p style="color:red; font-size:12px;display:none;" id="lver">Please enter a
+                                                first
+                                                name</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label class="label">Email:</label>
+                                            <input type="email" class="form-control input_field" id="email"
+                                                placeholder="Email">
+                                            <p style="color:red; font-size:12px;display:none;" id="emver">Please enter a
+                                                first
+                                                name</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label class="label">Level:</label>
+                                            <select class="form-group select_dropdown"
+                                                style="margin-top: 0;margin-bottom: 0;" id="auth_level"
+                                                aria-label="Default select example">
+                                                <option value="" selected disabled>Level...</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                            </select>
+                                            <p style="color:red; font-size:12px;display:none;margin-top:0;"
+                                                id="auth_msg">Enter a level...</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3">
-                                <div class="form-group">
-                                    <label class="label">Last name:</label>
-                                    <input type="text" class="form-control input_field" id="lastname"
-                                        placeholder="Last name">
-                                    <p style="color:red; font-size:12px;display:none;" id="lver">Please enter a first
-                                        name</p>
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="level_view">
+                                        <ul>
+                                            <li>2 - all pages</li>
+                                            <li>3 - all pages without koopsome</li>
+                                            <li>4 - Koopsome page only</li>
+                                        </ul>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="form-group">
-                                    <label class="label">Email:</label>
-                                    <input type="email" class="form-control input_field" id="email" placeholder="Email">
-                                    <p style="color:red; font-size:12px;display:none;" id="emver">Please enter a first
-                                        name</p>
+                                <div class="col-lg-4">
+                                    <div class="button_cont">
+                                        <button id="new_sub">Submit</button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <div class="form-group" >
-                                    <label class="label">Level:</label>
-                                    <select class="form-group select_dropdown" style="margin-top: 0;margin-bottom: 0;" id="auth_level"
-                                        aria-label="Default select example">
-                                        <option value="" selected disabled>Level...</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                    </select>
-                                     <p style="color:red; font-size:12px;display:none;margin-top:0;" id="auth_msg">Enter a level...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="button_cont">
-                                <button id="new_sub">Submit</button>
                             </div>
                         </div>
                     </div>
                 </div>
-
-            </div>
-            <div class="delete_user">
-                <div class="card" style="padding: 25px;">
-                    <div class="card-body">
-                        <H4>Delete user</H4>
-                        <p>Search here for the user you want to delete, delete will be permanent</p>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <select class="form-group select_dropdown" id="select_dropdown"
-                                    aria-label="Default select example">
-                                    <option selected disabled>Select a user...</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="button_">
-                                    <button id="delete_user">Delete</button>
+                <div class="col-lg-3">
+                    <div class="delete_user">
+                        <div class="card" style="padding: 25px;">
+                            <div class="card-body">
+                                <H4>Delete user</H4>
+                                <p>Search here for the user you want to delete, delete will be permanent</p>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <select class="form-group select_dropdown" id="select_dropdown"
+                                            aria-label="Default select example">
+                                            <option selected disabled>Select a user...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="button_">
+                                            <button id="delete_user">Delete</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

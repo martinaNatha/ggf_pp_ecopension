@@ -1,27 +1,41 @@
-$.get("/get_info_from_compass", function (result) {
-    const content = document.getElementById("eco_content")
-    const loader = document.getElementById("info_loader")
+// $.get("/get_info_from_compass", function (result) {});
+var tokenEncrypt = sessionStorage.getItem("tokenusers");
+var tokenUser = JSON.parse(tokenEncrypt);
+var country = tokenUser.country;
+get_data(country);
 
-    content.style.display= 'block';
-    loader.style.display= 'none';
-    loader.style.opacity= '0';
-
-  document.getElementById("wn").innerText = result.wn;
-  document.getElementById("wg").innerText = result.wg;
-  document.getElementById("wnwg").innerText = result.t;
-  $("#tbl_eco_user").DataTable({
-    data: result.datawn,
-    columns: [
-      { data: "MBR_NO" },
-      { data: "CASE_MBR_KEY" },
-      { data: "NAMEID" },
-      { data: "NATLIDNO" },
-      { data: "FIRSTNAME" },
-      { data: "LASTNAME" },
-      { data: "EXTD_MBR_STATUS" },
-      { data: "ORG_NAMEID" },
-    ],
-    layout: {
+async function get_data(count) {
+  const result = await fetch("/get_info_from_compass", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ count }),
+  }).then((res) => res.json());
+  if(result.status == '202'){
+    const content = document.getElementById("eco_content");
+    const loader = document.getElementById("info_loader");
+  
+    content.style.display = "block";
+    loader.style.display = "none";
+    loader.style.opacity = "0";
+  
+    document.getElementById("wn").innerText = result.wn;
+    document.getElementById("wg").innerText = result.wg;
+    document.getElementById("wnwg").innerText = result.t;
+    $("#tbl_eco_user").DataTable({
+      data: result.datawn,
+      columns: [
+        { data: "MBR_NO" },
+        { data: "CASE_MBR_KEY" },
+        { data: "NAMEID" },
+        { data: "NATLIDNO" },
+        { data: "FIRSTNAME" },
+        { data: "LASTNAME" },
+        { data: "EXTD_MBR_STATUS" },
+        { data: "ORG_NAMEID" },
+      ],
+      layout: {
         topStart: {
           buttons: [
             {
@@ -44,8 +58,16 @@ $.get("/get_info_from_compass", function (result) {
           ],
         },
       },
-  });
-});
+    });
+  }else{
+    Swal.fire({
+      title: "Error",
+      text: result.err,
+      icon: "error",
+    });
+  }
+  
+}
 
 // {
 //     "MBR_NO": "A181607",

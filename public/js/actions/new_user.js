@@ -1,30 +1,70 @@
+var country;
 (async function () {
-  get_data();
+  var tokenEncrypt = sessionStorage.getItem("tokenusers");
+  var tokenUser = JSON.parse(tokenEncrypt);
+  country = tokenUser.country;
+  console.log(country)
+  if(country == 'Curacao' && tokenUser.username == 'admineco'){
+    get_data("");
+  }else if(country == 'Curacao' && tokenUser.username == 'adminecocur'){
+    get_data('Curacao');
+  }else{
+    get_data('Aruba');
+  }
+  // fetch("https://ipapi.co/json/")
+  //   .then((response) => response.json())
+  //   .then((data) => {
+  //     const country = data.country_name; // Get the country name from the response
+  //     document.getElementById("country").innerText = `Your country: ${country}`;
+  //   })
+  //   .catch((error) => console.error("Error fetching the country:", error));
 })();
 
-async function get_data() {
-  $.get("/get_users", function (result) {
-    // $('#result').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+async function get_data(cou) {
+  const result = await fetch("/get_users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ cou }),
+  }).then((res) => res.json());
+  if (result.status == "202") {
     var result_data = result.data;
     $("#tbl_user").DataTable({
       data: result_data,
-      columns: [{ data: "username" }, { data: "firstname" }, { data: "lastname" } , { data: "email" }],
+      columns: [
+        { data: "username" },
+        { data: "firstname" },
+        { data: "lastname" },
+        { data: "email" },
+      ],
     });
     var userDropdown = document.getElementById("select_dropdown");
     result_data.forEach(function (user) {
-        var option = document.createElement("option");
-        option.value = user.id;
-        option.text = user.firstname;
-        userDropdown.add(option);
+      var option = document.createElement("option");
+      option.value = user.id;
+      option.text = user.firstname;
+      userDropdown.add(option);
     });
-  }).fail(function (jqXHR, textStatus, errorThrown) {
-    $("#result").html("Error: " + textStatus);
+  }else{
+    console.log(result_data)
     Swal.fire({
       title: "Error",
-      text: textStatus,
+      text: "error",
       icon: "error",
     });
-  });
+  }
+
+  // $.get("/get_users", function (result) {
+  //   // $('#result').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+  // }).fail(function (jqXHR, textStatus, errorThrown) {
+  //   $("#result").html("Error: " + textStatus);
+  //   Swal.fire({
+  //     title: "Error",
+  //     text: textStatus,
+  //     icon: "error",
+  //   });
+  // });
 }
 
 $("#new_sub").on("click", function () {
@@ -56,7 +96,7 @@ $("#new_sub").on("click", function () {
     document.getElementById("email").style.border = "1px solid red";
     document.getElementById("email").classList.add("error");
   } else {
-    store_new_user(firstname, lastname, email, level);
+    store_new_user(firstname, lastname, email, level,country);
   }
 });
 
@@ -86,14 +126,15 @@ $("#auth_level").on("change", function () {
 });
 
 // store new user
-async function store_new_user(firstname, lastname, email,level) {
+async function store_new_user(firstname, lastname, email, level, country) {
   event.preventDefault();
 
   var data_info = {
     firstname,
     lastname,
     email,
-    level
+    level,
+    country,
   };
   const result = await fetch("/add_new_user", {
     method: "POST",
@@ -120,7 +161,7 @@ async function store_new_user(firstname, lastname, email,level) {
       text: result.message,
       icon: "error",
     });
-  }else if (result.status == "505") {
+  } else if (result.status == "505") {
     Swal.fire({
       title: "Error",
       text: result.msg,

@@ -11,12 +11,12 @@ $("#log_buton").on("click", async function () {
   console.log(result.data);
   if (result.status == "202" && result.data[0].username.startsWith("eco")) {
     if(result.data[0].auth_level == '4'){
-      preload("/uploadlist", result.data)
+      preload("/uploadlist", result.data);
     }else{
-      preload("/home", result.data)
+      preload("/home", result.data);
     }
     // preload("/home", result.data)
-  } else if (result.status == "202" && result.data[0].username == "admineco") {
+  } else if (result.status == "202" && (result.data[0].username == "admineco" || result.data[0].username == "adminecoaua" || result.data[0].username == "adminecocur")) {
     preload("/admin_home", result.data)
   } else if (result.status == "202" && result.data[0].username == "test") {
     preload("/home", result.data)

@@ -1,0 +1,22 @@
+services:
+  odbc-gateway:
+    build: ./ggf_odbc_gateway/
+    container_name: odbc-gateway
+    networks:
+      - app-network
+ 
+  web-app:
+    build: ./ggf_pp_ecopension
+    container_name: ecopension-container
+    depends_on:
+      - odbc-gateway
+    networks:
+      - app-network
+        #    environment:
+        #- DSN=compassdsn  # Set DSN connection detailsports:
+    ports:
+      - "8086:8086"
+ 
+networks:
+  app-network:
+    driver: bridge

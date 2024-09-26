@@ -16,8 +16,8 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const axios = require("axios");
-const odbc = require('odbc');
-const qs = require('qs');
+const odbc = require("odbc");
+const qs = require("qs");
 
 require("dotenv").config();
 
@@ -453,7 +453,7 @@ app.post("/send_reseted_info", (req, res) => {
 });
 
 app.post("/add_new_user", async (req, res) => {
-  const { firstname, lastname, email, level} = req.body;
+  const { firstname, lastname, email, level, country } = req.body;
   const fullname = firstname + " " + lastname;
   const username =
     "eco" + firstname.substring(0, 4) + Math.floor(Math.random() * 1000);
@@ -479,6 +479,7 @@ app.post("/add_new_user", async (req, res) => {
     request.input("lastname", sql.VarChar, lastname);
     request.input("email", sql.VarChar, email);
     request.input("auth_level", sql.VarChar, level);
+    request.input("country", sql.VarChar, country);
 
     // Check if user already exists
     const checkUserQuery = `
@@ -500,8 +501,8 @@ app.post("/add_new_user", async (req, res) => {
 
       // Insert the new user with the hashed password
       const insertQuery = `
-        INSERT INTO web_users(username, password, firstname, lastname, email, auth_level)
-        VALUES (@username, @password, @firstname, @lastname, @email, @auth_level)
+        INSERT INTO web_users(username, password, firstname, lastname, email, auth_level,country)
+        VALUES (@username, @password, @firstname, @lastname, @email, @auth_level,@country)
       `;
       await request.query(insertQuery);
 
@@ -517,18 +518,36 @@ app.post("/add_new_user", async (req, res) => {
   }
 });
 
-app.get("/get_users", async (req, res) => {
-  try {
-    const pool = getPool();
-    const request = pool.request();
+app.post("/get_users", async (req, res) => {
+  const { cou } = req.body;
+  console.log(cou)
+  if (cou == "") {
+    try {
+      const pool = getPool();
+      const request = pool.request();
+      const result = await request.query(
+        `Select * from web_users where username != 'admineco'`
+      );
+      res.json({ status: "202", data: result.recordset });
+    } catch (err) {
+      console.error("Error executing query", err);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  } else {
+    try {
+      const pool = getPool();
+      const request = pool.request();
 
-    const result = await request.query(
-      `Select * from web_users where username != 'admineco'`
-    );
-    res.json({ data: result.recordset });
-  } catch (err) {
-    console.error("Error executing query", err);
-    res.status(500).json({ message: "Internal server error" });
+      const result = await request.query(
+        `Select * from web_users where username != 'admineco' and username != 'adminecoaua' and username != 'adminecocur' and country = '` +
+          cou +
+          `';`
+      );
+      res.json({ status: "202", data: result.recordset });
+    } catch (err) {
+      console.error("Error executing query", err);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
 });
 
@@ -646,7 +665,8 @@ app.post("/change_user_data", async (req, res) => {
   }
 });
 
-app.get("/get_users_act", async (req, res) => {
+app.post("/get_users_act", async (req, res) => {
+  const {country} = req.body;
   try {
     const pool = getPool();
     const request = pool.request();
@@ -672,9 +692,9 @@ app.get("/get_users_login", async (req, res) => {
   }
 });
 
-app.post("/reset_user_account",async (req, res) =>{
-  const {userId,firstname} = req.body;
-  console.log(firstname)
+app.post("/reset_user_account", async (req, res) => {
+  const { userId, firstname } = req.body;
+  console.log(firstname);
 
   const symbols = "!@#$%^&*<>?";
   const index = Math.floor(Math.random() * symbols.length);
@@ -686,23 +706,25 @@ app.post("/reset_user_account",async (req, res) =>{
     (Math.floor(Math.random() * 1000) + 10) +
     symbols.charAt(index);
 
-    // Hash the password before storing it
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+  // Hash the password before storing it
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  const query1 = `UPDATE web_users SET password = '`+hashedPassword+`' WHERE id = '${userId}'`;
-  const query2 = `Select * from web_users WHERE id = '`+userId+`'`;
-  
+  const query1 =
+    `UPDATE web_users SET password = '` +
+    hashedPassword +
+    `' WHERE id = '${userId}'`;
+  const query2 = `Select * from web_users WHERE id = '` + userId + `'`;
+
   try {
     const pool = getPool();
     const request = pool.request();
 
     const result1 = await request.query(query1);
 
-
     const result = await request.query(query2);
-    send_reseted_mail(password,result.recordset[0].email);
-    res.json({ status: "202"});
+    send_reseted_mail(password, result.recordset[0].email);
+    res.json({ status: "202" });
     // console.log(password,result.recordset[0].email)
   } catch (err) {
     console.error("Error executing query", err);
@@ -710,28 +732,83 @@ app.post("/reset_user_account",async (req, res) =>{
   }
 });
 
-app.get("/get_info_from_compass", async (req, res) => {
-  try {
-    // Open a connection to the database
-    const connection = await odbc.connect('Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#');
+app.post("/get_info_from_compass", async (req, res) => {
+  const { count } = req.body;
+  // console.log(count);
+  if (count == "") {
+    try {
+      // Open a connection to the database
+      const connection = await odbc.connect(
+        "Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#"
+      );
 
-    // Perform a query
-    const resultmem = await connection.query('SELECT * FROM PORTAL.PTL_MEMBERS order by JOIN_SCHEME_DT desc');
-    const resultcomp = await connection.query('SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG');
+      // Perform a query
+      const resultmem = await connection.query(
+        `SELECT * FROM PORTAL.PTL_MEMBERS order by JOIN_SCHEME_DT desc`
+      );
+      const resultcomp = await connection.query(
+        "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG"
+      );
 
-    const total = resultmem.length + resultcomp.length;
+      const total = resultmem.length + resultcomp.length;
 
-    res.json({ wn: resultmem.length.toLocaleString(), wg: resultcomp.length.toLocaleString(), t: total.toLocaleString(), datawn: resultmem});
+      res.json({
+        wn: resultmem.length.toLocaleString(),
+        wg: resultcomp.length.toLocaleString(),
+        t: total.toLocaleString(),
+        datawn: resultmem,
+      });
 
-    // Close the connection
-    await connection.close();
-  } catch (error) {
-    console.error('Error connecting to the database:', error);
+      // Close the connection
+      await connection.close();
+    } catch (error) {
+      console.error("Error connecting to the database:", error);
+    }
+  } else {
+    try {
+      // Open a connection to the database
+      const connection = await odbc.connect(
+        "Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#"
+      );
+      var resultmem;
+      var resultcomp;
+      if (count == "Aruba") {
+        resultmem = await connection.query(
+          `SELECT * FROM PORTAL.PTL_MEMBERS where COUNTRY_DESC = 'Aruba' order by JOIN_SCHEME_DT desc`
+        );
+        resultcomp = await connection.query(
+          "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG INNER JOIN PORTAL.PTL_CASE_DATA CD ON ORG.NAMEID= CD.ORG_NAMEID WHERE CD.SCHEME_BRANCHE = 'Aruba';"
+        );
+      }else{
+        resultmem = await connection.query(
+          `SELECT * FROM PORTAL.PTL_MEMBERS where COUNTRY_DESC != 'Aruba' order by JOIN_SCHEME_DT desc`
+        );
+        resultcomp = await connection.query(
+          "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG INNER JOIN PORTAL.PTL_CASE_DATA CD ON ORG.NAMEID= CD.ORG_NAMEID WHERE CD.SCHEME_BRANCHE != 'Aruba';"
+        );
+      }
+
+      const total = resultmem.length + resultcomp.length;
+
+      res.json({
+        status: "202",
+        wn: resultmem.length.toLocaleString(),
+        wg: resultcomp.length.toLocaleString(),
+        t: total.toLocaleString(),
+        datawn: resultmem,
+      });
+
+      // Close the connection
+      await connection.close();
+    } catch (error) {
+      console.error("Error connecting to the database:", error);
+      res.json({ err: error });
+    }
   }
 });
 
 app.post("/send_to_api", async (req, res) => {
-  const {jresult, username} = req.body;
+  const { jresult, username } = req.body;
   const json_data = JSON.parse(jresult);
   var gnummer, datenow;
 
@@ -765,16 +842,16 @@ app.post("/send_to_api", async (req, res) => {
   //get date
   function getFormattedDate() {
     const now = new Date();
-  
-    const day = String(now.getDate()).padStart(2, '0'); // Day with leading zero
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Month with leading zero (0-indexed, so +1)
+
+    const day = String(now.getDate()).padStart(2, "0"); // Day with leading zero
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Month with leading zero (0-indexed, so +1)
     const year = now.getFullYear();
-  
-    const hours = String(now.getHours()).padStart(2, '0'); // Hours with leading zero
-    const minutes = String(now.getMinutes()).padStart(2, '0'); // Minutes with leading zero
-    const seconds = String(now.getSeconds()).padStart(2, '0'); // Seconds with leading zero
-    const milliseconds = String(now.getMilliseconds()).padStart(3, '0'); // Milliseconds with leading zeros
-  
+
+    const hours = String(now.getHours()).padStart(2, "0"); // Hours with leading zero
+    const minutes = String(now.getMinutes()).padStart(2, "0"); // Minutes with leading zero
+    const seconds = String(now.getSeconds()).padStart(2, "0"); // Seconds with leading zero
+    const milliseconds = String(now.getMilliseconds()).padStart(3, "0"); // Milliseconds with leading zeros
+
     datenow = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}:${milliseconds}`;
   }
   getFormattedDate();
@@ -865,8 +942,8 @@ app.post("/send_to_api", async (req, res) => {
   };
 
   console.log(outputJson);
-  
-  store_data(gnummer,username, "", totalamount, "Koopsome");
+
+  store_data(gnummer, username, "", totalamount, "Koopsom");
   getTokenAndSendRequest(outputJson);
   // res.json({status:"202"})
   //send json to API
@@ -874,40 +951,43 @@ app.post("/send_to_api", async (req, res) => {
     try {
       // First POST request to get the token with basic auth
       const auth = {
-        username: 'h3tMbOEy-iA305q-H7muYg..',
-        password: 'PggJQEGXFwMvgDEJtMUQ0w..',
+        username: "h3tMbOEy-iA305q-H7muYg..",
+        password: "PggJQEGXFwMvgDEJtMUQ0w..",
       };
-  
+
       const tokenResponse = await axios.post(
-        'http://200.16.93.41:8080/portal/ptl/oauth/token',
+        "http://200.16.93.41:8080/portal/ptl/oauth/token",
         qs.stringify({
-          grant_type: 'client_credentials',
+          grant_type: "client_credentials",
         }),
         {
           auth, // Basic authentication
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "Content-Type": "application/x-www-form-urlencoded",
           },
         }
       );
-  
+
       // Extract the token from the response
       const token = tokenResponse.data.access_token;
-      console.log('Token received:', token);
-  
+      console.log("Token received:", token);
+
       const response = await axios.post(
-        'http://200.16.93.41:8080/portal/ptl/inpension/transaction', // Replace with actual endpoint
+        "http://200.16.93.41:8080/portal/ptl/inpension/transaction", // Replace with actual endpoint
         output,
         {
           headers: {
             Authorization: `Bearer ${token}`, // Add token in Authorization header
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
-      res.json({status:"202", data:response.data});
+      res.json({ status: "202", data: response.data });
     } catch (error) {
-      console.error('Error:', error.response ? error.response.data : error.message);
+      console.error(
+        "Error:",
+        error.response ? error.response.data : error.message
+      );
     }
   }
 });
@@ -953,7 +1033,10 @@ function checkNetworkPath(path, callback) {
 
 const upload = multer({ dest: "uploads/" });
 
-app.post( "/upload",upload.fields([{ name: "file1" }, { name: "file2" }]),(req, res) => {
+app.post(
+  "/upload",
+  upload.fields([{ name: "file1" }, { name: "file2" }]),
+  (req, res) => {
     const file1 = req.files["file1"] ? req.files["file1"][0] : null;
     const file2 = req.files["file2"] ? req.files["file2"][0] : null;
 
@@ -1367,7 +1450,7 @@ function send_email_new_cred(email, name, username, password) {
 
 </body>
 
-</html>`,
+    </html>`,
   };
 
   // Send the email
@@ -1379,7 +1462,7 @@ function send_email_new_cred(email, name, username, password) {
   });
 }
 
-function send_reseted_mail(new_p, mail){
+function send_reseted_mail(new_p, mail) {
   let transporter = nodemailer.createTransport({
     host: "smtp.sendgrid.net",
     port: 587,
@@ -1706,7 +1789,7 @@ function send_reseted_mail(new_p, mail){
   });
 }
 
-function send_onboard_mail(user){
+function send_onboard_mail(user) {
   let transporter = nodemailer.createTransport({
     host: "smtp.sendgrid.net",
     port: 587,
@@ -1722,7 +1805,7 @@ function send_onboard_mail(user){
 
   let mailOptions = {
     from: "Ecopension <ggf_internal@myguardiangroup.com>",
-    to: 'nathaniel.martina@myguardiangroup.com, sherwayne.celestina@myguardiangroup.com',
+    to: "nathaniel.martina@myguardiangroup.com, sherwayne.celestina@myguardiangroup.com",
     subject: "Onboarding Ecopension",
     html: `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en">
