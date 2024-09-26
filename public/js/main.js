@@ -7,33 +7,34 @@ var user_name;
 var email;
 var tokenUser;
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Disable right-click context menu
-  document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-  });
+// document.addEventListener('DOMContentLoaded', function() {
+//   // Disable right-click context menu
+//   document.addEventListener('contextmenu', function(e) {
+//       e.preventDefault();
+//   });
 
-  // Disable F12 key and other shortcuts
-  document.addEventListener('keydown', function(e) {
-      // Disable F12 key
-      if (e.key === 'F12') {
-          e.preventDefault();
-      }
+//   // Disable F12 key and other shortcuts
+//   document.addEventListener('keydown', function(e) {
+//       // Disable F12 key
+//       if (e.key === 'F12') {
+//           e.preventDefault();
+//       }
 
-      // Disable Ctrl+Shift+I (or Cmd+Shift+I on Mac)
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
-          e.preventDefault();
-      }
+//       // Disable Ctrl+Shift+I (or Cmd+Shift+I on Mac)
+//       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
+//           e.preventDefault();
+//       }
 
-      // Disable Ctrl+U (view source)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'U') {
-          e.preventDefault();
-      }
-  });
-});
+//       // Disable Ctrl+U (view source)
+//       if ((e.ctrlKey || e.metaKey) && e.key === 'U') {
+//           e.preventDefault();
+//       }
+//   });
+// });
 
 (async function () {
   getUserInfo();
+  console.log(tokenUser.auth_level);
   if(tokenUser.auth_level == '2'){
     document.querySelector('.homet').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(2)').style.display = 'flex';

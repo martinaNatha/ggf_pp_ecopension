@@ -1,25 +1,48 @@
 var user_id;
 var firstname, lastname, email;
+var tokenEncrypt = sessionStorage.getItem("tokenusers");
+var tokenUser = JSON.parse(tokenEncrypt);
+var country = tokenUser.country;
+
 (async function () {
-  get_data();
+  get_data(country);
 })();
 
-async function get_data() {
-  $.get("/get_users", function (result) {
-    var result_data = result.data;
-    $("#tbl_user").DataTable({
-      data: result_data,
-      columns: [{ data: "username" }, { data: "name" }, { data: "email" }],
-    });
-    var userDropdown = document.getElementById("select_dropdown");
-    result_data.forEach(function (user) {
-      var option = document.createElement("option");
-      option.value = user.id;
-      option.text = user.firstname;
-      userDropdown.add(option);
-    });
-  }).fail(function (jqXHR, textStatus, errorThrown) {
+async function get_data(cou) {
+  const result = await fetch("/get_users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ cou }),
+  }).then((res) => res.json());
+  var result_data = result.data;
+  $("#tbl_user").DataTable({
+    data: result_data,
+    columns: [{ data: "username" }, { data: "name" }, { data: "email" }],
   });
+  var userDropdown = document.getElementById("select_dropdown");
+  result_data.forEach(function (user) {
+    var option = document.createElement("option");
+    option.value = user.id;
+    option.text = user.firstname;
+    userDropdown.add(option);
+  });
+  // $.get("/get_users", function (result) {
+  //   var result_data = result.data;
+  //   $("#tbl_user").DataTable({
+  //     data: result_data,
+  //     columns: [{ data: "username" }, { data: "name" }, { data: "email" }],
+  //   });
+  //   var userDropdown = document.getElementById("select_dropdown");
+  //   result_data.forEach(function (user) {
+  //     var option = document.createElement("option");
+  //     option.value = user.id;
+  //     option.text = user.firstname;
+  //     userDropdown.add(option);
+  //   });
+  // }).fail(function (jqXHR, textStatus, errorThrown) {
+  // });
 }
 
 var userDropdown = document.getElementById("select_dropdown");

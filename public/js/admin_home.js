@@ -34,22 +34,6 @@ async function compass_info(count) {
   cont.style.opacity = "1";
 }
 
-// $.get("/get_info_from_compass", function (result) {
-//   wndata = result.datawn;
-//   console.log(wndata);
-//   document.getElementById("wnnum").innerText = result.wn;
-//   document.getElementById("wgnum").innerText = result.wg;
-//   document.getElementById("wtotal").innerText = result.t;
-//   get_data();
-//   createPieChart(wndata);
-//   createLineChart(wndata);
-//   const loader = document.getElementById("admin_load");
-//   const cont = document.getElementById("admin_contentb");
-//   loader.style.display = "none";
-//   cont.style.display = "block";
-//   cont.style.opacity = '1';
-// });
-
 async function get_data(cou) {
   const result = await fetch("/get_users", {
     method: "POST",

@@ -520,7 +520,7 @@ app.post("/add_new_user", async (req, res) => {
 
 app.post("/get_users", async (req, res) => {
   const { cou } = req.body;
-  console.log(cou)
+  console.log(cou);
   if (cou == "") {
     try {
       const pool = getPool();
@@ -666,7 +666,7 @@ app.post("/change_user_data", async (req, res) => {
 });
 
 app.post("/get_users_act", async (req, res) => {
-  const {country} = req.body;
+  const { country } = req.body;
   try {
     const pool = getPool();
     const request = pool.request();
@@ -737,69 +737,58 @@ app.post("/get_info_from_compass", async (req, res) => {
   // console.log(count);
   if (count == "") {
     try {
-      // Open a connection to the database
-      const connection = await odbc.connect(
-        "Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#"
-      );
-
-      // Perform a query
-      const resultmem = await connection.query(
-        `SELECT * FROM PORTAL.PTL_MEMBERS order by JOIN_SCHEME_DT desc`
-      );
-      const resultcomp = await connection.query(
-        "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG"
-      );
-
-      const total = resultmem.length + resultcomp.length;
-
-      res.json({
-        wn: resultmem.length.toLocaleString(),
-        wg: resultcomp.length.toLocaleString(),
-        t: total.toLocaleString(),
-        datawn: resultmem,
+      const resultmem = await axios.post(process.env.API_PRD, {
+        query: `SELECT * FROM PORTAL.PTL_MEMBERS order by JOIN_SCHEME_DT desc`,
       });
 
-      // Close the connection
-      await connection.close();
+      const resultcomp = await axios.post(process.env.API_PRD, {
+        query: "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG",
+      });
+      console.log(resultmem.data.data.length);
+      const total = resultmem.data.data.length + resultcomp.data.data.length;
+
+      res.json({
+        wn: resultmem.data.data.length.toLocaleString(),
+        wg: resultcomp.data.data.length.toLocaleString(),
+        t: total.toLocaleString(),
+        datawn: resultmem.data.data,
+      });
     } catch (error) {
       console.error("Error connecting to the database:", error);
     }
   } else {
     try {
-      // Open a connection to the database
-      const connection = await odbc.connect(
-        "Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#"
-      );
       var resultmem;
       var resultcomp;
       if (count == "Aruba") {
-        resultmem = await connection.query(
-          `SELECT * FROM PORTAL.PTL_MEMBERS where COUNTRY_DESC = 'Aruba' order by JOIN_SCHEME_DT desc`
-        );
-        resultcomp = await connection.query(
-          "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG INNER JOIN PORTAL.PTL_CASE_DATA CD ON ORG.NAMEID= CD.ORG_NAMEID WHERE CD.SCHEME_BRANCHE = 'Aruba';"
-        );
-      }else{
-        resultmem = await connection.query(
-          `SELECT * FROM PORTAL.PTL_MEMBERS where COUNTRY_DESC != 'Aruba' order by JOIN_SCHEME_DT desc`
-        );
-        resultcomp = await connection.query(
-          "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG INNER JOIN PORTAL.PTL_CASE_DATA CD ON ORG.NAMEID= CD.ORG_NAMEID WHERE CD.SCHEME_BRANCHE != 'Aruba';"
-        );
+        resultmem = await axios.post(process.env.API_PRD, {
+          query: `SELECT * FROM PORTAL.PTL_MEMBERS where COUNTRY_DESC = 'Aruba' order by JOIN_SCHEME_DT desc`,
+        });
+
+        resultcomp = await axios.post(process.env.API_PRD, {
+          query:
+            "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG INNER JOIN PORTAL.PTL_CASE_DATA CD ON ORG.NAMEID= CD.ORG_NAMEID WHERE CD.SCHEME_BRANCHE = 'Aruba';",
+        });
+      } else {
+        resultmem = await axios.post(process.env.API_PRD, {
+          query: `SELECT * FROM PORTAL.PTL_MEMBERS where COUNTRY_DESC != 'Aruba' order by JOIN_SCHEME_DT desc`,
+        });
+
+        resultcomp = await axios.post(process.env.API_PRD, {
+          query:
+            "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG INNER JOIN PORTAL.PTL_CASE_DATA CD ON ORG.NAMEID= CD.ORG_NAMEID WHERE CD.SCHEME_BRANCHE != 'Aruba';",
+        });
       }
 
-      const total = resultmem.length + resultcomp.length;
+      const total = resultmem.data.data.length + resultcomp.data.data.length;
 
       res.json({
         status: "202",
-        wn: resultmem.length.toLocaleString(),
-        wg: resultcomp.length.toLocaleString(),
+        wn: resultmem.data.data.length.toLocaleString(),
+        wg: resultcomp.data.data.length.toLocaleString(),
         t: total.toLocaleString(),
-        datawn: resultmem,
+        datawn: resultmem.data.data,
       });
-
-      // Close the connection
-      await connection.close();
     } catch (error) {
       console.error("Error connecting to the database:", error);
       res.json({ err: error });
@@ -810,34 +799,13 @@ app.post("/get_info_from_compass", async (req, res) => {
 app.post("/send_to_api", async (req, res) => {
   const { jresult, username } = req.body;
   const json_data = JSON.parse(jresult);
-  var gnummer, datenow;
+  var gnummer = resultJson.Employer;
+  var datenow;
 
   //get total amount of all Koopsom
   var totalamount = json_data.data.reduce((total, user) => {
     return total + user["Single Premium"];
   }, 0);
-
-  //find Gnummber in Compass based on the name
-  try {
-    // Open a connection to the database
-    // prod "Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#"
-    const connection = await odbc.connect(
-      "Dsn=compasstst;uid=UIPATH_ADV;pwd=XNIOEpA4JR"
-    );
-
-    // Perform a query
-    const result = await connection.query(
-      `SELECT CONT_NO FROM PORTAL.PTL_CASE_DATA WHERE PLAN_NM = '${json_data.Employer}'`
-    );
-
-    gnummer = result[0].CONT_NO;
-    // res.json({ wn: resultmem.length, wg: resultcomp.length });
-
-    // Close the connection
-    await connection.close();
-  } catch (error) {
-    console.error("Error connecting to the database:", error);
-  }
 
   //get date
   function getFormattedDate() {
