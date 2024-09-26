@@ -822,7 +822,7 @@ app.post("/send_to_api", async (req, res) => {
     // Open a connection to the database
     // prod "Dsn=compassodbc;uid=UIPATH;pwd=Welcome123#"
     const connection = await odbc.connect(
-      "Dsn=compasstest;uid=UIPATH_ADV;pwd=XNIOEpA4JR"
+      "Dsn=compasstst;uid=UIPATH_ADV;pwd=XNIOEpA4JR"
     );
 
     // Perform a query
