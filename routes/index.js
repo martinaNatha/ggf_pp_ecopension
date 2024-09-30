@@ -23,6 +23,12 @@ router.get("/getaccountinfo", (req, res) => {
 router.get("/uploadlist", (req, res) => {
     res.render("pages/users/koopsome");
   });
+router.get("/helpuser", (req, res) => {
+    res.render("pages/users/help");
+  });
+router.get("/helpadmin", (req, res) => {
+    res.render("pages/users/helpadmin");
+  });
 
 router.get("/admin_home", (req, res) => {
     res.render("pages/admin/admin_home");

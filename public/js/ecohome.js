@@ -13,6 +13,7 @@ async function get_data(count) {
     body: JSON.stringify({ count }),
   }).then((res) => res.json());
   if(result.status == '202'){
+    console.log(result.datawg)
     const content = document.getElementById("eco_content");
     const loader = document.getElementById("info_loader");
   
@@ -22,7 +23,7 @@ async function get_data(count) {
   
     document.getElementById("wn").innerText = result.wn;
     document.getElementById("wg").innerText = result.wg;
-    document.getElementById("wnwg").innerText = result.t;
+    // document.getElementById("wnwg").innerText = result.t;
     $("#tbl_eco_user").DataTable({
       data: result.datawn,
       columns: [

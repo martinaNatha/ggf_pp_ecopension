@@ -34,7 +34,7 @@ var tokenUser;
 
 (async function () {
   getUserInfo();
-  console.log(tokenUser.auth_level);
+  // console.log(tokenUser.auth_level);
   if(tokenUser.auth_level == '2'){
     document.querySelector('.homet').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(2)').style.display = 'flex';
@@ -73,6 +73,14 @@ $("#logout").on("click", async function () {
   sessionStorage.clear();
   history.pushState(null, null, "/");
   window.location.href = "/";
+});
+
+$("#help").on('click', function(){
+  if(tokenUser.auth_level == "2" || tokenUser.auth_level == "3" || tokenUser.auth_level == "4"){
+    window.location.href = "/helpuser";
+  }else{
+    window.location.href = "/helpadmin";
+  }
 });
 
 //reset account page

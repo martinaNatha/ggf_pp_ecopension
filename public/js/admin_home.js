@@ -20,10 +20,10 @@ async function compass_info(count) {
     body: JSON.stringify({ count }),
   }).then((res) => res.json());
   wndata = result.datawn;
-  console.log(wndata);
+  console.log(result.datawg);
   document.getElementById("wnnum").innerText = result.wn;
   document.getElementById("wgnum").innerText = result.wg;
-  document.getElementById("wtotal").innerText = result.t;
+  // document.getElementById("wtotal").innerText = result.t;
   get_data(count);
   createPieChart(wndata);
   createLineChart(wndata);
@@ -32,6 +32,7 @@ async function compass_info(count) {
   loader.style.display = "none";
   cont.style.display = "block";
   cont.style.opacity = "1";
+
 }
 
 async function get_data(cou) {

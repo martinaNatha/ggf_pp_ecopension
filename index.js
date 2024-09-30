@@ -520,7 +520,6 @@ app.post("/add_new_user", async (req, res) => {
 
 app.post("/get_users", async (req, res) => {
   const { cou } = req.body;
-  console.log(cou);
   if (cou == "") {
     try {
       const pool = getPool();
@@ -741,10 +740,12 @@ app.post("/get_info_from_compass", async (req, res) => {
         query: `SELECT * FROM PORTAL.PTL_MEMBERS order by JOIN_SCHEME_DT desc`,
       });
 
+      // const resultcomp = await axios.post(process.env.API_PRD, {
+      //   query: "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG",
+      // });
       const resultcomp = await axios.post(process.env.API_PRD, {
-        query: "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG",
-      });
-      console.log(resultmem.data.data.length);
+        query: "SELECT casd.cont_no,casd.plan_nm, casd.pr_case_no relnr, fls_fatum.get_scheme_planType(casd.cont_no) PlanType, fls_fatum.get_scheme_status(casd.cont_no) scheme_status, fls_fatum.get_scheme_branche(casd.case_key, sysdate) branche from case_data casd,case_statuses csst where 1=1 AND csst.eff_dt <= sysdate AND (csst.xpir_dt IS NULL OR csst.xpir_dt > sysdate) AND casd.case_key = csst.case_key AND   csst.case_stat_cd in ('07', 'Z1') AND   csst.rec_stat_cd = '0'  --[0] = Live record AND   fls_fatum.get_scheme_planType(  casd.cont_no) not in ('DB', 'IND')",});    
+      console.log(resultcomp.data.data.length);
       const total = resultmem.data.data.length + resultcomp.data.data.length;
 
       res.json({
@@ -752,6 +753,7 @@ app.post("/get_info_from_compass", async (req, res) => {
         wg: resultcomp.data.data.length.toLocaleString(),
         t: total.toLocaleString(),
         datawn: resultmem.data.data,
+        datawg: resultcomp.data.data
       });
     } catch (error) {
       console.error("Error connecting to the database:", error);
@@ -780,14 +782,14 @@ app.post("/get_info_from_compass", async (req, res) => {
         });
       }
 
-      const total = resultmem.data.data.length + resultcomp.data.data.length;
+      // const total = resultmem.data.data.length + resultcomp.data.data.length;
 
       res.json({
         status: "202",
         wn: resultmem.data.data.length.toLocaleString(),
         wg: resultcomp.data.data.length.toLocaleString(),
-        t: total.toLocaleString(),
         datawn: resultmem.data.data,
+        datawg: resultcomp.data.data
       });
     } catch (error) {
       console.error("Error connecting to the database:", error);
@@ -797,9 +799,10 @@ app.post("/get_info_from_compass", async (req, res) => {
 });
 
 app.post("/send_to_api", async (req, res) => {
-  const { jresult, username } = req.body;
+  const { jresult, username , filename,} = req.body;
   const json_data = JSON.parse(jresult);
-  var gnummer = resultJson.Employer;
+  var gnummer = json_data.Employer;
+  var amanummer = json_data.data.length;
   var datenow;
 
   //get total amount of all Koopsom
@@ -824,6 +827,8 @@ app.post("/send_to_api", async (req, res) => {
   }
   getFormattedDate();
 
+  //check if gnumber and amount of single premium is already added
+
   //create the json to send to API
   const outputJson = {
     Mutaties: {
@@ -831,88 +836,107 @@ app.post("/send_to_api", async (req, res) => {
         {
           CASE_KEY: gnummer,
           UPLOAD_DT: datenow,
-          PYRL_CONTRIB_AMT: "",
-          PYRL_CONTRIB_EFF_DT: "",
-          PAYROLL_BEG_DT: "",
-          PAYROLL_END_DT: "",
           TYP_CD: "00",
           PORTAL_CHANGE_CD: "6",
           SAL_RENEW_CD: "N",
           CHNG_DT: datenow,
           SPRM_TOTAL_AMT: totalamount,
-          Member_Request: [],
           SINGLE_PREMIUMS: json_data.data.map((wn) => ({
             CASE_MBR_KEY: wn["Participant Number"],
             SINGLE_PREMIUM: wn["Single Premium"],
           })),
-          Miscellaneous_Request: {
-            CASE_MBR_KEY: "",
-            PEND_MBR_REF_ID: "",
-            NATLIDNO: "",
-            PYRL_NO: "",
-            CHNG_TYP_CD: "",
-            CHNG_AMT: "",
-            CHNG_DT: "",
-            CHNG_DATA: "",
-            CHNG_PCT: "",
-            CHNG_EXIT_REAS_CD: "",
-            CHNG_EXIT_DT: "",
-            SPOUSAL_CNT: "",
-            DEPENDENT_CNT: "",
-            BIRTH_DT_DEPENDENT: "",
-            BIRTH_COUNTRY_CD: "",
-            ADDR_LINE1: "",
-            ADDR_LINE2: "",
-            ADDR_LINE3: "",
-            ADDR_CITY: "",
-            ADDR_POST_CD: "",
-            ADDR_COUNTRY_TXT: "",
-            ADDR_COUNTRY_CD: "",
-            ADDR_EMAIL: "",
-            PHONE: "",
-            NATIONALITY_CD: "",
-            MBGP_KEY: "",
-            MBGC_KEY: "",
-            files: {
-              id: "",
-              id_partner: "",
-              health_form: "",
-              birth_certificate: "",
-            },
-          },
-          Payroll_Request: {
-            MBR_TYP_CD: "",
-            MBGC_KEY: "",
-            PYRL_NO: "",
-            CASE_MBR_KEY: "",
-            PEND_MBR_REF_ID: "",
-            NATLIDNO: "",
-            BIRTHDT: "",
-            CHNG_DT: "",
-            JOIN_SCH_DT: "",
-            JOIN_COMP_DT: "",
-            FIRSTNAME: "",
-            LASTNAM: "",
-            MIDNAME: "",
-            NAMEPREFIX: "",
-            NAMESUFFIX: "",
-            ANN_SAL_AMT: "",
-            SAL_EFF_DT: "",
-            PART_TIME_PCT: "",
-            SEXCD: "",
-            SPOUSAL_CNT: "",
-            DEPENDENT_CNT: "",
-          },
         },
       ],
       Aantal_Mutaties: "1",
     },
   };
+  // const outputJson = {
+  //   Mutaties: {
+  //     Portal_Request: [
+  //       {
+  //         CASE_KEY: gnummer,
+  //         UPLOAD_DT: datenow,
+  //         PYRL_CONTRIB_AMT: "",
+  //         PYRL_CONTRIB_EFF_DT: "",
+  //         PAYROLL_BEG_DT: "",
+  //         PAYROLL_END_DT: "",
+  //         TYP_CD: "00",
+  //         PORTAL_CHANGE_CD: "6",
+  //         SAL_RENEW_CD: "N",
+  //         CHNG_DT: datenow,
+  //         SPRM_TOTAL_AMT: totalamount,
+  //         Member_Request: [],
+  //         SINGLE_PREMIUMS: json_data.data.map((wn) => ({
+  //           CASE_MBR_KEY: wn["Participant Number"],
+  //           SINGLE_PREMIUM: wn["Single Premium"],
+  //         })),
+  //         Miscellaneous_Request: {
+  //           CASE_MBR_KEY: "",
+  //           PEND_MBR_REF_ID: "",
+  //           NATLIDNO: "",
+  //           PYRL_NO: "",
+  //           CHNG_TYP_CD: "",
+  //           CHNG_AMT: "",
+  //           CHNG_DT: "",
+  //           CHNG_DATA: "",
+  //           CHNG_PCT: "",
+  //           CHNG_EXIT_REAS_CD: "",
+  //           CHNG_EXIT_DT: "",
+  //           SPOUSAL_CNT: "",
+  //           DEPENDENT_CNT: "",
+  //           BIRTH_DT_DEPENDENT: "",
+  //           BIRTH_COUNTRY_CD: "",
+  //           ADDR_LINE1: "",
+  //           ADDR_LINE2: "",
+  //           ADDR_LINE3: "",
+  //           ADDR_CITY: "",
+  //           ADDR_POST_CD: "",
+  //           ADDR_COUNTRY_TXT: "",
+  //           ADDR_COUNTRY_CD: "",
+  //           ADDR_EMAIL: "",
+  //           PHONE: "",
+  //           NATIONALITY_CD: "",
+  //           MBGP_KEY: "",
+  //           MBGC_KEY: "",
+  //           files: {
+  //             id: "",
+  //             id_partner: "",
+  //             health_form: "",
+  //             birth_certificate: "",
+  //           },
+  //         },
+  //         Payroll_Request: {
+  //           MBR_TYP_CD: "",
+  //           MBGC_KEY: "",
+  //           PYRL_NO: "",
+  //           CASE_MBR_KEY: "",
+  //           PEND_MBR_REF_ID: "",
+  //           NATLIDNO: "",
+  //           BIRTHDT: "",
+  //           CHNG_DT: "",
+  //           JOIN_SCH_DT: "",
+  //           JOIN_COMP_DT: "",
+  //           FIRSTNAME: "",
+  //           LASTNAM: "",
+  //           MIDNAME: "",
+  //           NAMEPREFIX: "",
+  //           NAMESUFFIX: "",
+  //           ANN_SAL_AMT: "",
+  //           SAL_EFF_DT: "",
+  //           PART_TIME_PCT: "",
+  //           SEXCD: "",
+  //           SPOUSAL_CNT: "",
+  //           DEPENDENT_CNT: "",
+  //         },
+  //       },
+  //     ],
+  //     Aantal_Mutaties: "1",
+  //   },
+  // };
 
   console.log(outputJson);
-
-  store_data(gnummer, username, "", totalamount, "Koopsom");
-  getTokenAndSendRequest(outputJson);
+  // getTokenAndSendRequest(outputJson);
+  store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
   // res.json({status:"202"})
   //send json to API
   async function getTokenAndSendRequest(output) {
@@ -951,6 +975,8 @@ app.post("/send_to_api", async (req, res) => {
         }
       );
       res.json({ status: "202", data: response.data });
+      store_data(gnummer, username, "", totalamount, "Koopsom");
+      store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
     } catch (error) {
       console.error(
         "Error:",
@@ -958,6 +984,30 @@ app.post("/send_to_api", async (req, res) => {
       );
     }
   }
+});
+
+app.post("/check_if_exists", async (req,res) =>{
+  const {jresult, anummers, total_amount, filename} = req.body;
+
+  try {
+    const pool = getPool();
+    const request = pool.request();
+
+    // Add parameters to the request
+    request.input("gnumber", sql.VarChar, jresult);
+    request.input("amount_anumbers", sql.VarChar, anummers.toString()); // Adjust type if needed
+    request.input("total_amount", sql.VarChar, total_amount.toString());
+    request.input("filename", sql.VarChar, filename);
+
+    const result = await request.query(
+      `INSERT INTO user_action_logs (users, amount_anumber, type, actions, data) 
+       VALUES (@name_u, @Aamount, @type, @action, @info)`
+    );
+  } catch (err) {
+    console.error("Error executing query", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+
 });
 
 function moveFiles(srcFilePath, destDirPath, fileName) {
@@ -1075,6 +1125,28 @@ async function store_data(info, name_u, type, Aamount, action) {
     const result = await request.query(
       `INSERT INTO user_action_logs (users, amount_anumber, type, actions, data) 
        VALUES (@name_u, @Aamount, @type, @action, @info)`
+    );
+  } catch (err) {
+    console.error("Error executing query", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+async function store_koopsom_action(gnummer, uname, filename, tamount, amount_a) {
+  console.log(gnummer, uname, filename, tamount, amount_a)
+  try {
+    const pool = getPool();
+    const request = pool.request();
+
+    // Add parameters to the request
+    request.input("gnumber", sql.VarChar, gnummer);
+    request.input("amount_anumbers", sql.VarChar, amount_a.toString()); // Adjust type if needed
+    request.input("username", sql.VarChar, uname);
+    request.input("total_amount", sql.VarChar, tamount.toString());
+    request.input("filename", sql.Text, filename); // Use appropriate type for large text
+
+    const result = await request.query(
+      `INSERT INTO koopsome_log (username, gnumber, amount_anumbers, total_amount, filename) 
+       VALUES (@username, @gnumber, @amount_anumbers, @total_amount, @filename)`
     );
   } catch (err) {
     console.error("Error executing query", err);
