@@ -935,8 +935,8 @@ app.post("/send_to_api", async (req, res) => {
   // };
 
   console.log(outputJson);
-  // getTokenAndSendRequest(outputJson);
-  store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
+  getTokenAndSendRequest(outputJson);
+  // store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
   // res.json({status:"202"})
   //send json to API
   async function getTokenAndSendRequest(output) {
@@ -1132,7 +1132,7 @@ async function store_data(info, name_u, type, Aamount, action) {
   }
 }
 async function store_koopsom_action(gnummer, uname, filename, tamount, amount_a) {
-  console.log(gnummer, uname, filename, tamount, amount_a)
+  // console.log(gnummer, uname, filename, tamount, amount_a)
   try {
     const pool = getPool();
     const request = pool.request();
