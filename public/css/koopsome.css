@@ -225,3 +225,18 @@
         opacity: 0.25;
    }
 }
+
+@media screen and (max-width: 1280px) {
+    .left{
+        width: 60%;
+    }
+    .right {
+        width: 40%;
+    }
+    .content_on{
+        
+    }
+    .content_box{
+        width: 40%;
+    }
+}

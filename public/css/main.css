@@ -716,6 +716,13 @@ nav {
         width: 35px;
         height: 35px;
     }
+    .upload-button {
+        height: 200px;
+        width: 40%;
+    }
+    .sinlge_b{
+        width: 60%;
+    }
 }
 
 @media screen and (max-width: 700px) {

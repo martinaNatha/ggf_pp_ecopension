@@ -26,6 +26,7 @@ async function get_data(count) {
     // document.getElementById("wnwg").innerText = result.t;
     $("#tbl_eco_user").DataTable({
       data: result.datawn,
+      responsive: true,
       columns: [
         { data: "MBR_NO" },
         { data: "CASE_MBR_KEY" },

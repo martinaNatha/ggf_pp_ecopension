@@ -745,7 +745,7 @@ app.post("/get_info_from_compass", async (req, res) => {
       // });
       const resultcomp = await axios.post(process.env.API_PRD, {
         query: "SELECT casd.cont_no,casd.plan_nm, casd.pr_case_no relnr, fls_fatum.get_scheme_planType(casd.cont_no) PlanType, fls_fatum.get_scheme_status(casd.cont_no) scheme_status, fls_fatum.get_scheme_branche(casd.case_key, sysdate) branche from case_data casd,case_statuses csst where 1=1 AND csst.eff_dt <= sysdate AND (csst.xpir_dt IS NULL OR csst.xpir_dt > sysdate) AND casd.case_key = csst.case_key AND   csst.case_stat_cd in ('07', 'Z1') AND   csst.rec_stat_cd = '0'  --[0] = Live record AND   fls_fatum.get_scheme_planType(  casd.cont_no) not in ('DB', 'IND')",});    
-      console.log(resultcomp.data.data.length);
+      // console.log(resultcomp.data.data.length);
       const total = resultmem.data.data.length + resultcomp.data.data.length;
 
       res.json({

@@ -395,10 +395,16 @@ div.dt-container div.dt-search {
     }
 
     .button_cont button {
-        width: 25%;
+        width: 50%;
     }
 
     .admin_herser2 {
         display: block;
+    }
+    .row_{
+        display: block;
+    }
+    .body_cont{
+        width: 530px;
     }
 }
