@@ -18,7 +18,7 @@ router.get("/onboarding", (req, res) => {
     res.render("pages/users/onboardacc");
   });
 router.get("/getaccountinfo", (req, res) => {
-    res.render("pages/users/check_status");
+    res.render("pages/users/checkstatus");
   });
 router.get("/uploadlist", (req, res) => {
     res.render("pages/users/koopsome");

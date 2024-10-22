@@ -37,6 +37,7 @@ async function get_data(cou) {
         { data: "firstname" },
         { data: "lastname" },
         { data: "email" },
+        { data: "auth_level" },
       ],
     });
     var userDropdown = document.getElementById("select_dropdown");

@@ -4,7 +4,7 @@ var tokenUser = JSON.parse(tokenEncrypt);
 var country = tokenUser.country;
 
 (async function () {
-  console.log(country)
+  console.log(country);
   user_action();
   get_login_logs();
 })();
@@ -55,6 +55,13 @@ async function user_action() {
             titleAttr: "Print",
             className: "custom-excel-button",
           },
+          {
+            className: "tb_refresh",
+            text: '<i class="fa-solid fa-rotate-right" style="font-size:22px;vertical-align:middle;"></i>',
+            action: function (e, dt, node, config) {
+              dt.ajax.reload();
+            },
+          },
         ],
       },
     },
@@ -100,7 +107,7 @@ async function user_action() {
     }
   });
   // $.get("/get_users_act", function (result) {
-    
+
   // }).fail(function (jqXHR, textStatus, errorThrown) {
   //   $("#result").html("Error: " + textStatus);
   //   Swal.fire({

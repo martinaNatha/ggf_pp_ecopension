@@ -744,7 +744,9 @@ app.post("/get_info_from_compass", async (req, res) => {
       //   query: "SELECT * FROM PORTAL.PTL_ORGANIZATIONS ORG",
       // });
       const resultcomp = await axios.post(process.env.API_PRD, {
-        query: "SELECT casd.cont_no,casd.plan_nm, casd.pr_case_no relnr, fls_fatum.get_scheme_planType(casd.cont_no) PlanType, fls_fatum.get_scheme_status(casd.cont_no) scheme_status, fls_fatum.get_scheme_branche(casd.case_key, sysdate) branche from case_data casd,case_statuses csst where 1=1 AND csst.eff_dt <= sysdate AND (csst.xpir_dt IS NULL OR csst.xpir_dt > sysdate) AND casd.case_key = csst.case_key AND   csst.case_stat_cd in ('07', 'Z1') AND   csst.rec_stat_cd = '0'  --[0] = Live record AND   fls_fatum.get_scheme_planType(  casd.cont_no) not in ('DB', 'IND')",});    
+        query:
+          "SELECT casd.cont_no,casd.plan_nm, casd.pr_case_no relnr, fls_fatum.get_scheme_planType(casd.cont_no) PlanType, fls_fatum.get_scheme_status(casd.cont_no) scheme_status, fls_fatum.get_scheme_branche(casd.case_key, sysdate) branche from case_data casd,case_statuses csst where 1=1 AND csst.eff_dt <= sysdate AND (csst.xpir_dt IS NULL OR csst.xpir_dt > sysdate) AND casd.case_key = csst.case_key AND   csst.case_stat_cd in ('07', 'Z1') AND   csst.rec_stat_cd = '0'  --[0] = Live record AND fls_fatum.get_scheme_planType(casd.cont_no) not in ('DB', 'IND')",
+      });
       // console.log(resultcomp.data.data.length);
       const total = resultmem.data.data.length + resultcomp.data.data.length;
 
@@ -753,7 +755,7 @@ app.post("/get_info_from_compass", async (req, res) => {
         wg: resultcomp.data.data.length.toLocaleString(),
         t: total.toLocaleString(),
         datawn: resultmem.data.data,
-        datawg: resultcomp.data.data
+        datawg: resultcomp.data.data,
       });
     } catch (error) {
       console.error("Error connecting to the database:", error);
@@ -789,7 +791,7 @@ app.post("/get_info_from_compass", async (req, res) => {
         wn: resultmem.data.data.length.toLocaleString(),
         wg: resultcomp.data.data.length.toLocaleString(),
         datawn: resultmem.data.data,
-        datawg: resultcomp.data.data
+        datawg: resultcomp.data.data,
       });
     } catch (error) {
       console.error("Error connecting to the database:", error);
@@ -799,7 +801,7 @@ app.post("/get_info_from_compass", async (req, res) => {
 });
 
 app.post("/send_to_api", async (req, res) => {
-  const { jresult, username , filename,} = req.body;
+  const { jresult, username, filename } = req.body;
   const json_data = JSON.parse(jresult);
   var gnummer = json_data.Employer;
   var amanummer = json_data.data.length;
@@ -935,20 +937,20 @@ app.post("/send_to_api", async (req, res) => {
   // };
 
   console.log(outputJson);
-  getTokenAndSendRequest(outputJson);
-  // store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
+  // getTokenAndSendRequest(outputJson);
+  store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
   // res.json({status:"202"})
   //send json to API
   async function getTokenAndSendRequest(output) {
     try {
       // First POST request to get the token with basic auth
       const auth = {
-        username: "h3tMbOEy-iA305q-H7muYg..",
-        password: "PggJQEGXFwMvgDEJtMUQ0w..",
+        username: process.env.USERNAME_API_TST,
+        password: process.env.PASSWORD_API_TST,
       };
 
       const tokenResponse = await axios.post(
-        "http://200.16.93.41:8080/portal/ptl/oauth/token",
+        process.env.API_URL_TOEKN_TST,
         qs.stringify({
           grant_type: "client_credentials",
         }),
@@ -965,7 +967,7 @@ app.post("/send_to_api", async (req, res) => {
       console.log("Token received:", token);
 
       const response = await axios.post(
-        "http://200.16.93.41:8080/portal/ptl/inpension/transaction", // Replace with actual endpoint
+        process.env.API_URL_TRANSACTION_TST, // Replace with actual endpoint
         output,
         {
           headers: {
@@ -986,28 +988,113 @@ app.post("/send_to_api", async (req, res) => {
   }
 });
 
-app.post("/check_if_exists", async (req,res) =>{
-  const {jresult, anummers, total_amount, filename} = req.body;
+app.post("/check_if_exists", async (req, res) => {
+  const { jresult, anummers, total_amount, filename } = req.body;
+  var datenow;
+  function getFormattedDate() {
+    const now = new Date();
 
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    datenow = `${year}-${month}-${day}`;
+  }
+  getFormattedDate();
   try {
     const pool = getPool();
     const request = pool.request();
 
     // Add parameters to the request
-    request.input("gnumber", sql.VarChar, jresult);
+    request.input("daterun", sql.VarChar, datenow);
+    request.input("gnumber", sql.VarChar, JSON.parse(jresult).Employer);
     request.input("amount_anumbers", sql.VarChar, anummers.toString()); // Adjust type if needed
     request.input("total_amount", sql.VarChar, total_amount.toString());
     request.input("filename", sql.VarChar, filename);
 
+    // const result = await request.query(
+    //   `INSERT INTO user_action_logs (username, gnumber, amount_anumbers, total_amount, filename)
+    //    VALUES (@name, @gnumber, @amount_anumbers, @total_amount, @filename)`
+    // );
     const result = await request.query(
-      `INSERT INTO user_action_logs (users, amount_anumber, type, actions, data) 
-       VALUES (@name_u, @Aamount, @type, @action, @info)`
+      `SELECT * 
+      FROM koopsome_log
+      WHERE daterun = @daterun
+      AND gnumber = @gnumber 
+      AND amount_anumbers = @amount_anumbers 
+      AND total_amount = @total_amount 
+      AND filename = @filename;`
     );
+    // console.log(result.recordset.length);
+    if (result.recordset.length > 0) {
+      check_if_exist_in_compass(jresult, "1");
+    } else {
+      check_if_exist_in_compass(jresult, "0");
+      // console.log(response)
+    }
+
+    async function check_if_exist_in_compass(jresult, veri) {
+      // console.log(JSON.parse(jresult).data);
+      // query: `SELECT * FROM PORTAL.PTL_MEMBERS MB inner join PORTAL.PTL_CASE_DATA CD on MB.ORG_NAMEID = CD.ORG_NAMEID WHERE CD.CONT_NO = '${JSON.parse(jresult).Employer}' and MB.MBR_NO IN (${anums}) `
+      // SELECT to_char(vemp.case_mbr_key) ForeignKey, vemp.cont_no, vemp.mbr_no FROM vemployees vemp,case_data casd,case_statuses csst WHERE casd.case_key = vemp.case_key AND vemp.lastname NOT LIKE '%${JSON.parse(jresult).Employer}%' AND vemp.case_key= csst.case_key AND csst.case_stat_cd <> '09' AND csst.rec_stat_cd = '0' AND ( csst.xpir_dt IS NULL OR csst.xpir_dt > sysdate) AND csst.eff_dt <= sysdate AND fls_fatum.get_mbr_stat(vemp.case_mbr_key, sysdate) <> 'Deceased' and vemp.mbr_no = 'A386745'
+      var anumercheck = JSON.parse(jresult).data.length;
+      const participantNumbers = JSON.parse(jresult).data.map(
+        (item) => item["Participant Number"]
+      );
+      const anums = participantNumbers.map((item) => `'${item}'`).join(", ");
+      try {
+        const resultmem = await axios.post(process.env.API_PRD, {
+          // query: `SELECT * FROM PORTAL.PTL_MEMBERS MB inner join PORTAL.PTL_CASE_DATA CD on MB.ORG_NAMEID = CD.ORG_NAMEID WHERE CD.CONT_NO = '${JSON.parse(jresult).Employer}' and MB.MBR_NO IN (${anums})`,
+          query: `SELECT to_char(vemp.case_mbr_key) ForeignKey,      vemp.cont_no,      vemp.mbr_no     FROM  vemployees      vemp,     case_data       casd, case_statuses   csst WHERE casd.case_key      = vemp.case_key AND   vemp.lastname    NOT LIKE 'XXX%' AND   vemp.case_key      = csst.case_key AND   csst.case_stat_cd <> '09' AND   csst.rec_stat_cd   = '0' AND ( csst.xpir_dt      IS NULL OR csst.xpir_dt > sysdate) AND   csst.eff_dt       <= sysdate AND   fls_fatum.get_mbr_stat(vemp.case_mbr_key, sysdate) <> 'Deceased' AND vemp.cont_no = '${
+            JSON.parse(jresult).Employer
+          }' AND vemp.mbr_no IN ( ${anums})`,
+        });
+        const resultgnummer = await axios.post(process.env.API_PRD, {
+          query: `SELECT * FROM case_data casd where casd.cont_no = '${
+            JSON.parse(jresult).Employer
+          }'`,
+        });
+
+        if (
+          anumercheck == resultmem.data.data.length &&
+          resultgnummer.data.data[0].CONT_NO == JSON.parse(jresult).Employer
+        ) {
+          if (veri == 1) {
+            res.json({ status: "already stored", data: resultmem.data.data });
+          } else {
+            res.json({ status: "new" });
+          }
+        } else {
+          if (resultgnummer.data.data.length > "0") {
+            var arrresp = [];
+            var arrAnummers = [];
+            resultmem.data.data.forEach(function (number) {
+              arrAnummers.push(number.MBR_NO);
+            });
+            for (let i = 0; i < participantNumbers.length; i++) {
+              if (!arrAnummers.includes(participantNumbers[i])) {
+                arrresp.push(participantNumbers[i]);
+              }
+            }
+            res.json({
+              status: "aonly",
+              data: arrresp,
+              dataG: JSON.parse(jresult).Employer,
+            });
+          } else {
+            res.json({
+              status: "agonly",
+              dataG: JSON.parse(jresult).Employer,
+            });
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
   } catch (err) {
     console.error("Error executing query", err);
     res.status(500).json({ message: "Internal server error" });
   }
-
 });
 
 function moveFiles(srcFilePath, destDirPath, fileName) {
@@ -1131,7 +1218,14 @@ async function store_data(info, name_u, type, Aamount, action) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-async function store_koopsom_action(gnummer, uname, filename, tamount, amount_a) {
+
+async function store_koopsom_action(
+  gnummer,
+  uname,
+  filename,
+  tamount,
+  amount_a
+) {
   // console.log(gnummer, uname, filename, tamount, amount_a)
   try {
     const pool = getPool();

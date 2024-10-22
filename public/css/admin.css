@@ -380,6 +380,20 @@ div.dt-container div.dt-search {
     height: 100%;
 }
 
+.tb_refresh{
+    /* background: #218838 !important; */
+    background: #ffffff00 !important;
+    /* Green background */
+    color: white !important;
+    /* White text */
+    border: none !important;
+    padding: 0px 0px 0px 10px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    height: 30px;
+    
+}
+
 @media screen and (max-width: 1280px) {
     .admin_card {
         width: 98%;
