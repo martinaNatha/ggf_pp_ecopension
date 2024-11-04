@@ -13,7 +13,6 @@ async function get_data(count) {
     body: JSON.stringify({ count }),
   }).then((res) => res.json());
   if(result.status == '202'){
-    console.log(result.datawg)
     const content = document.getElementById("eco_content");
     const loader = document.getElementById("info_loader");
   

@@ -23,6 +23,9 @@ router.get("/getaccountinfo", (req, res) => {
 router.get("/uploadlist", (req, res) => {
     res.render("pages/users/koopsome");
   });
+router.get("/payrollimport", (req, res) => {
+    res.render("pages/users/payrollimport");
+  });
 router.get("/helpuser", (req, res) => {
     res.render("pages/users/help");
   });

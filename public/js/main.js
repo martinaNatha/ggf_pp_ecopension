@@ -7,30 +7,39 @@ var user_name;
 var email;
 var tokenUser;
 
-// document.addEventListener('DOMContentLoaded', function() {
-//   // Disable right-click context menu
-//   document.addEventListener('contextmenu', function(e) {
-//       e.preventDefault();
-//   });
+document.addEventListener('DOMContentLoaded', function() {
+  // Disable right-click context menu
+  document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+  });
 
-//   // Disable F12 key and other shortcuts
-//   document.addEventListener('keydown', function(e) {
-//       // Disable F12 key
-//       if (e.key === 'F12') {
-//           e.preventDefault();
-//       }
+  // Disable F12 key and other shortcuts
+  document.addEventListener('keydown', function(e) {
+      // Disable F12 key
+      if (e.key === 'F12') {
+          e.preventDefault();
+      }
 
-//       // Disable Ctrl+Shift+I (or Cmd+Shift+I on Mac)
-//       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
-//           e.preventDefault();
-//       }
+      // Disable Ctrl+Shift+I (or Cmd+Shift+I on Mac)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
+          e.preventDefault();
+      }
 
+<<<<<<< Updated upstream
 //       // Disable Ctrl+U (view source)
 //       if ((e.ctrlKey || e.metaKey) && e.key === 'U') {
 //           e.preventDefault();
 //       }
 //   });
 // });
+=======
+      // Disable Ctrl+U (view source)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'U') {
+          e.preventDefault();
+      }
+  });
+});
+>>>>>>> Stashed changes
 
 (async function () {
   getUserInfo();
@@ -45,6 +54,7 @@ var tokenUser;
     document.querySelector('.ul-content ul li:nth-child(7)').style.display = 'flex';
     document.querySelector('.koopt').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(9)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(10)').style.display = 'flex';
   }else if(tokenUser.auth_level == '3'){
     document.querySelector('.homet').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(2)').style.display = 'flex';
@@ -56,6 +66,7 @@ var tokenUser;
   }else if(tokenUser.auth_level == '4'){
     document.querySelector('.koopt').style.display = 'flex';
     document.querySelector('.ul-content ul li:nth-child(9)').style.display = 'flex';
+    document.querySelector('.ul-content ul li:nth-child(10)').style.display = 'flex';
   }
 })();
 
@@ -137,6 +148,7 @@ $(".ul-content_admin ul li").click(function (e) {
 
 $(".ul-content ul li").click(function (e) {
   e.preventDefault();
+  console.log($(this).text())
   $(".ul-content ul li").removeClass("active");
   if ($(this).text() == "Reset Accounts") {
     window.location.replace("/resetaccounts");
@@ -150,6 +162,8 @@ $(".ul-content ul li").click(function (e) {
     window.location.replace("/uploadlist");
   }else if ($(this).text() == "Get Account Info") {
     window.location.replace("/getaccountinfo");
+  }else if ($(this).text() == "Payroll Import") {
+    window.location.replace("/payrollimport");
   }else {
     window.location.replace("/home");
   }

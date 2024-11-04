@@ -28,21 +28,27 @@ document.getElementById("excelinput").addEventListener("change", function (e) {
     sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     console.log(sheetData);
     const row1 = sheetData[0] || [];
-    const row3 = sheetData[2] || [];
+    const row2 = sheetData[1] || [];
+    const row3 = sheetData[3] || [];
 
     // Define the required words
     const requiredHeaders1 = ["Employer"];
+    const requiredHeaders2 = ["Upload date"];
     const requiredHeaders = ["Participant Number", "Single Premium"];
 
     // Check for missing headers in row 1 and row 3
     const missingInRow1 = requiredHeaders1.filter(
       (header) => !row1.includes(header)
     );
+    const missingInRow2 = requiredHeaders2.filter(
+      (header) => !row2.includes(header)
+    );
     const missingInRow3 = requiredHeaders.filter(
       (header) => !row3.includes(header)
     );
 
     let resultMessage = "";
+<<<<<<< Updated upstream
     if (missingInRow1.length === 0 && missingInRow3.length === 0) {
       const msg = document.getElementById("koopmsg");
       msg.style.display = "block";
@@ -50,6 +56,10 @@ document.getElementById("excelinput").addEventListener("change", function (e) {
       msg.innerText = "The uploaded file is valid!";
       // get_data_from_excel();
       document.getElementById("sub_button").disabled = false;
+=======
+    if (missingInRow1.length === 0 && missingInRow2.length === 0 && missingInRow3.length === 0) {
+      get_data_from_excel();
+>>>>>>> Stashed changes
     } else {
       if (missingInRow1.length > 0) {
         resultMessage += `Missing headers in row 1: ${missingInRow1.join(
@@ -61,8 +71,17 @@ document.getElementById("excelinput").addEventListener("change", function (e) {
         msg.style.color = "white";
         msg.innerText = resultMessage;
       }
+      if (missingInRow2.length > 0) {
+        resultMessage += `Missing headers in row 2: ${missingInRow2.join(
+          ", "
+        )}.\n`;
+        const msg = document.getElementById("koopmsg");
+        msg.style.display = "block";
+        msg.style.color = "white";
+        msg.innerText = resultMessage;
+      }
       if (missingInRow3.length > 0) {
-        resultMessage += `Missing headers in row 3: ${missingInRow3.join(
+        resultMessage += `Missing headers in row 4: ${missingInRow3.join(
           ", "
         )}.\n`;
         const msg = document.getElementById("koopmsg");
@@ -112,9 +131,13 @@ document.getElementById("sub_button").addEventListener("click", function () {
     Employer: C1Value,
     data: dataRows,
   };
+<<<<<<< Updated upstream
 
   // Display the value from C1 and the JSON data
   // console.log(JSON.stringify(resultJson, null, 2));
+=======
+  console.log(resultJson)
+>>>>>>> Stashed changes
   send_data();
 });
 
@@ -126,10 +149,10 @@ function get_data_from_excel(){
   // Get value from cell C1 (row 1, column C, which is index 2 because arrays are 0-indexed)
   const C1Value = sheetData[0] ? sheetData[0][2] : "N/A";
   // Get headers from row 3 (which is sheetData[2])
-  const headers = sheetData[2] || [];
+  const headers = sheetData[3] || [];
   // Get all data under the headers, i.e., rows starting from row 4
   const dataRows = [];
-  for (let i = 3; i < sheetData.length; i++) {
+  for (let i = 4; i < sheetData.length; i++) {
     const rowData = {};
     headers.forEach((header, index) => {
       const cellValue = sheetData[i][index];

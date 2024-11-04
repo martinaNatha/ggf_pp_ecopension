@@ -683,7 +683,7 @@ app.get("/get_users_login", async (req, res) => {
     const pool = getPool();
     const request = pool.request();
 
-    const result = await request.query(`Select * from login_logs`);
+    const result = await request.query(`Select * from login_logs where users != 'Administrator'`);
     res.json({ data: result.recordset });
   } catch (err) {
     console.error("Error executing query", err);
@@ -803,13 +803,14 @@ app.post("/send_to_api", async (req, res) => {
   const json_data = JSON.parse(jresult);
   var gnummer = json_data.Employer;
   var amanummer = json_data.data.length;
+  var uploadDate = json_data.UploadDate;
   var datenow;
 
   //get total amount of all Koopsom
   var totalamount = json_data.data.reduce((total, user) => {
     return total + user["Single Premium"];
   }, 0);
-
+  totalamount = Math.round(totalamount * 100) / 100;
   //get date
   function getFormattedDate() {
     const now = new Date();
@@ -828,19 +829,18 @@ app.post("/send_to_api", async (req, res) => {
   getFormattedDate();
 
   //check if gnumber and amount of single premium is already added
-
   //create the json to send to API
   const outputJson = {
     Mutaties: {
       Portal_Request: [
         {
           CASE_KEY: gnummer,
-          UPLOAD_DT: datenow,
+          UPLOAD_DT: uploadDate,
           TYP_CD: "00",
           PORTAL_CHANGE_CD: "6",
           SAL_RENEW_CD: "N",
           CHNG_DT: datenow,
-          SPRM_TOTAL_AMT: totalamount,
+          SPRM_TOTAL_AMT: totalamount.toFixed(2),
           SINGLE_PREMIUMS: json_data.data.map((wn) => ({
             CASE_MBR_KEY: wn["Participant Number"],
             SINGLE_PREMIUM: wn["Single Premium"],
@@ -850,6 +850,7 @@ app.post("/send_to_api", async (req, res) => {
       Aantal_Mutaties: "1",
     },
   };
+<<<<<<< Updated upstream
   // const outputJson = {
   //   Mutaties: {
   //     Portal_Request: [
@@ -984,6 +985,20 @@ app.post("/send_to_api", async (req, res) => {
       );
     }
   }
+=======
+  // console.log(outputJson);
+  getTokenAndSendRequest(
+    res,
+    outputJson,
+    gnummer,
+    username,
+    filename,
+    totalamount,
+    amanummer,
+    "Koopsom"
+  );
+  // store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
+>>>>>>> Stashed changes
 });
 
 app.post("/check_if_exists", async (req,res) =>{
@@ -1009,6 +1024,134 @@ app.post("/check_if_exists", async (req,res) =>{
   }
 
 });
+
+app.post("/send_data_payroll", async (req, res) => {
+  const { jresult, username, filename } = req.body;
+  let datenow;
+  
+  function getFormattedDate() {
+    const now = new Date();
+    datenow = `${String(now.getDate()).padStart(2, "0")}-${String(now.getMonth() + 1).padStart(2, "0")}-${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}:${String(now.getMilliseconds()).padStart(3, "0")}`;
+  }
+  getFormattedDate();
+
+  let json_data;
+  try {
+    json_data = JSON.parse(jresult);
+  } catch (error) {
+    return res.status(400).json({ status: "error", message: "Invalid JSON" });
+  }
+
+  const dataEntries = json_data.data.map((entry) => {
+    const birthYear = new Date(entry.BirthDate).getFullYear();
+    const prefix =  birthYear.toString().slice(0, 2);
+    entry["ID. Nr."] = `${prefix}${entry["ID. Nr."]}`;
+    return entry;
+  });
+
+  const idnumArray = dataEntries.map((item) => item["ID. Nr."]);
+  const areAllIdsValid = idnumArray.every((id) => id.length === 10);
+  
+  if (!areAllIdsValid) {
+    return res.status(400).json({ status: "error", message: "Invalid ID lengths" });
+  }
+
+  const query = `
+    SELECT ve.MBR_NO, p.NATLIDNO 
+    FROM VEMPLOYEES ve 
+    INNER JOIN PERSON p ON p.NAMEID = ve.NAMEID 
+    WHERE ve.CONT_NO = '`+json_data.Gnummer+`' AND p.NATLIDNO IN (${idnumArray.map((id) => `'${id}'`).join(",")})
+  `;
+
+  try {
+    const resultmem = await axios.post(process.env.API_TST, { query });
+    // console.log(resultmem.data.data)
+    const jsonArray = resultmem.data.data;
+    const jsonNATLIDNOs = jsonArray.map((item) => item.NATLIDNO);
+    const missingItems = idnumArray.filter((item) => !jsonNATLIDNOs.includes(item));
+
+    if (missingItems.length > 0) {
+      return alertClient(res, missingItems, missingItems.length);
+    }
+
+    const natlIdMap = Object.fromEntries(jsonArray.map((member) => [member.NATLIDNO, member.MBR_NO]));
+
+    json_data.data.forEach((entry) => {
+      if (natlIdMap[entry["ID. Nr."]]) {
+        entry["ID. Nr."] = natlIdMap[entry["ID. Nr."]];
+      }
+    });
+
+    const outputJson = {
+      Mutaties: {
+        Portal_Request: [
+          {
+            CASE_KEY: json_data.Gnummer,
+            UPLOAD_DT: json_data.PeriodDate,
+            TYP_CD: "00",
+            PORTAL_CHANGE_CD: "6",
+            SAL_RENEW_CD: "N",
+            CHNG_DT: datenow,
+            SPRM_TOTAL_AMT: json_data.TotalPAmount.toFixed(2),
+            SINGLE_PREMIUMS: json_data.data.map((wn) => ({
+              CASE_MBR_KEY: wn["ID. Nr."],
+              SINGLE_PREMIUM: wn["Amount"],
+            })),
+          },
+        ],
+        Aantal_Mutaties: "1",
+      },
+    };
+    // console.log(outputJson)
+    await getTokenAndSendRequest(res, outputJson, json_data.Gnummer, username, filename, json_data.TotalPAmount.toFixed(2), json_data.data.length, "Payroll Import");
+  } catch (error) {
+    res.status(500).json({ status: "error", message: "Internal server error, Please contact IT Department" });
+  }
+
+  function alertClient(res, missingItems, itleng) {
+    if (itleng <= 5) {
+      return res.json({
+        status: "miss",
+        message: `${itleng} ID's cannot be found in Compass <br>${missingItems}`,
+      });
+    } else {
+      return res.json({
+        status: "miss",
+        message: "A number of ID's cannot be found in Compass <br>Please add correctly!",
+      });
+    }
+  }
+});
+
+async function getTokenAndSendRequest(res, output, gnummer, username, filename, totalamount, amanummer, type) {
+  try {
+    const auth = {
+      username: process.env.USERNAME_API_TST,
+      password: process.env.PASSWORD_API_TST,
+    };
+
+    const tokenResponse = await axios.post(process.env.API_URL_TOEKN_TST, qs.stringify({ grant_type: "client_credentials" }), {
+      auth,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+
+    const token = tokenResponse.data.access_token;
+    // console.log("Token received:", token);
+
+    const response = await axios.post(process.env.API_URL_TRANSACTION_TST, output, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    res.json({ status: "ok", data: response.data });
+    store_data(gnummer, username, "", totalamount, type);
+    store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
+  } catch (error) {
+    console.error("Error:", error.response ? error.response.data : error.message);
+  }
+}
 
 function moveFiles(srcFilePath, destDirPath, fileName) {
   const destFilePath = path.join(destDirPath, fileName);
@@ -2055,6 +2198,20 @@ function send_onboard_mail(user) {
     console.log("Message sent: %s", info.messageId);
   });
 }
+
+async function tst(){
+
+  const query = `
+  SELECT ve.MBR_NO, p.NATLIDNO 
+  FROM VEMPLOYEES ve 
+  INNER JOIN PERSON p ON p.NAMEID = ve.NAMEID 
+  WHERE ve.CONT_NO = 'G000982'and p.NATLIDNO = '1974050299'
+  `;
+  const resultmem = await axios.post(process.env.API_TST, { query });
+  console.log(resultmem.data.data);
+}
+// tst();
+
 
 app.use(require("./routes"));
 app.use(express.static(path.join(__dirname, "public")));
