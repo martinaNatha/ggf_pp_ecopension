@@ -25,21 +25,12 @@ document.addEventListener('DOMContentLoaded', function() {
           e.preventDefault();
       }
 
-<<<<<<< Updated upstream
-//       // Disable Ctrl+U (view source)
-//       if ((e.ctrlKey || e.metaKey) && e.key === 'U') {
-//           e.preventDefault();
-//       }
-//   });
-// });
-=======
       // Disable Ctrl+U (view source)
       if ((e.ctrlKey || e.metaKey) && e.key === 'U') {
           e.preventDefault();
       }
   });
 });
->>>>>>> Stashed changes
 
 (async function () {
   getUserInfo();

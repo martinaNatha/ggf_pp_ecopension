@@ -850,7 +850,6 @@ app.post("/send_to_api", async (req, res) => {
       Aantal_Mutaties: "1",
     },
   };
-<<<<<<< Updated upstream
   // const outputJson = {
   //   Mutaties: {
   //     Portal_Request: [
@@ -985,20 +984,6 @@ app.post("/send_to_api", async (req, res) => {
       );
     }
   }
-=======
-  // console.log(outputJson);
-  getTokenAndSendRequest(
-    res,
-    outputJson,
-    gnummer,
-    username,
-    filename,
-    totalamount,
-    amanummer,
-    "Koopsom"
-  );
-  // store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
->>>>>>> Stashed changes
 });
 
 app.post("/check_if_exists", async (req,res) =>{
