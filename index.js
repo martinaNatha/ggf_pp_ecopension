@@ -941,161 +941,286 @@ app.post("/send_to_api", async (req, res) => {
   store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
   // res.json({status:"202"})
   //send json to API
-  async function getTokenAndSendRequest(output) {
-    try {
-      // First POST request to get the token with basic auth
-      const auth = {
-        username: process.env.USERNAME_API_TST,
-        password: process.env.PASSWORD_API_TST,
-      };
-
-      const tokenResponse = await axios.post(
-        process.env.API_URL_TOEKN_TST,
-        qs.stringify({
-          grant_type: "client_credentials",
-        }),
-        {
-          auth, // Basic authentication
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-
-      // Extract the token from the response
-      const token = tokenResponse.data.access_token;
-      console.log("Token received:", token);
-
-      const response = await axios.post(
-        process.env.API_URL_TRANSACTION_TST, // Replace with actual endpoint
-        output,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token in Authorization header
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      res.json({ status: "202", data: response.data });
-      store_data(gnummer, username, "", totalamount, "Koopsom");
-      store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
-    } catch (error) {
-      console.error(
-        "Error:",
-        error.response ? error.response.data : error.message
-      );
-    }
-  }
 });
 
 app.post("/check_if_exists", async (req, res) => {
   const { jresult, anummers, total_amount, filename } = req.body;
-  var datenow;
-  function getFormattedDate() {
-    const now = new Date();
 
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    datenow = `${year}-${month}-${day}`;
-  }
-  getFormattedDate();
+  // Get the current date in 'YYYY-MM-DD' format
+  const datenow = new Date().toISOString().split("T")[0];
+
   try {
     const pool = getPool();
     const request = pool.request();
 
-    // Add parameters to the request
+    // Input parameters
     request.input("daterun", sql.VarChar, datenow);
     request.input("gnumber", sql.VarChar, JSON.parse(jresult).Employer);
-    request.input("amount_anumbers", sql.VarChar, anummers.toString()); // Adjust type if needed
+    request.input("amount_anumbers", sql.VarChar, anummers.toString());
     request.input("total_amount", sql.VarChar, total_amount.toString());
     request.input("filename", sql.VarChar, filename);
 
-    // const result = await request.query(
-    //   `INSERT INTO user_action_logs (username, gnumber, amount_anumbers, total_amount, filename)
-    //    VALUES (@name, @gnumber, @amount_anumbers, @total_amount, @filename)`
-    // );
-    const result = await request.query(
-      `SELECT * 
-      FROM koopsome_log
+    // Query to check if record exists
+    const result = await request.query(`
+      SELECT * FROM koopsome_log
       WHERE daterun = @daterun
-      AND gnumber = @gnumber 
-      AND amount_anumbers = @amount_anumbers 
-      AND total_amount = @total_amount 
-      AND filename = @filename;`
-    );
-    // console.log(result.recordset.length);
-    if (result.recordset.length > 0) {
-      check_if_exist_in_compass(jresult, "1");
-    } else {
-      check_if_exist_in_compass(jresult, "0");
-      // console.log(response)
-    }
+      AND gnumber = @gnumber
+      AND amount_anumbers = @amount_anumbers
+      AND total_amount = @total_amount
+      AND filename = @filename;
+    `);
 
-    async function check_if_exist_in_compass(jresult, veri) {
-      // console.log(JSON.parse(jresult).data);
-      // query: `SELECT * FROM PORTAL.PTL_MEMBERS MB inner join PORTAL.PTL_CASE_DATA CD on MB.ORG_NAMEID = CD.ORG_NAMEID WHERE CD.CONT_NO = '${JSON.parse(jresult).Employer}' and MB.MBR_NO IN (${anums}) `
-      // SELECT to_char(vemp.case_mbr_key) ForeignKey, vemp.cont_no, vemp.mbr_no FROM vemployees vemp,case_data casd,case_statuses csst WHERE casd.case_key = vemp.case_key AND vemp.lastname NOT LIKE '%${JSON.parse(jresult).Employer}%' AND vemp.case_key= csst.case_key AND csst.case_stat_cd <> '09' AND csst.rec_stat_cd = '0' AND ( csst.xpir_dt IS NULL OR csst.xpir_dt > sysdate) AND csst.eff_dt <= sysdate AND fls_fatum.get_mbr_stat(vemp.case_mbr_key, sysdate) <> 'Deceased' and vemp.mbr_no = 'A386745'
-      var anumercheck = JSON.parse(jresult).data.length;
+    const recordExists = result.recordset.length > 0;
+    const verificationStatus = recordExists ? "1" : "0";
+    checkIfExistInCompass(jresult, verificationStatus);
+
+    // Function to handle secondary check
+    async function checkIfExistInCompass(jresult, verificationStatus) {
       const participantNumbers = JSON.parse(jresult).data.map(
         (item) => item["Participant Number"]
       );
-      const anums = participantNumbers.map((item) => `'${item}'`).join(", ");
+      const anums = participantNumbers.map((num) => `'${num}'`).join(", ");
+      const employer = JSON.parse(jresult).Employer;
+
       try {
-        const resultmem = await axios.post(process.env.API_PRD, {
-          // query: `SELECT * FROM PORTAL.PTL_MEMBERS MB inner join PORTAL.PTL_CASE_DATA CD on MB.ORG_NAMEID = CD.ORG_NAMEID WHERE CD.CONT_NO = '${JSON.parse(jresult).Employer}' and MB.MBR_NO IN (${anums})`,
-          query: `SELECT to_char(vemp.case_mbr_key) ForeignKey,      vemp.cont_no,      vemp.mbr_no     FROM  vemployees      vemp,     case_data       casd, case_statuses   csst WHERE casd.case_key      = vemp.case_key AND   vemp.lastname    NOT LIKE 'XXX%' AND   vemp.case_key      = csst.case_key AND   csst.case_stat_cd <> '09' AND   csst.rec_stat_cd   = '0' AND ( csst.xpir_dt      IS NULL OR csst.xpir_dt > sysdate) AND   csst.eff_dt       <= sysdate AND   fls_fatum.get_mbr_stat(vemp.case_mbr_key, sysdate) <> 'Deceased' AND vemp.cont_no = '${
-            JSON.parse(jresult).Employer
-          }' AND vemp.mbr_no IN ( ${anums})`,
-        });
-        const resultgnummer = await axios.post(process.env.API_PRD, {
-          query: `SELECT * FROM case_data casd where casd.cont_no = '${
-            JSON.parse(jresult).Employer
-          }'`,
+        const resultmem = await axios.post(process.env.API_TST, {
+          query: `SELECT to_char(vemp.case_mbr_key) AS ForeignKey,
+                         vemp.cont_no,
+                         vemp.mbr_no
+                  FROM vemployees vemp
+                  JOIN case_data casd ON casd.case_key = vemp.case_key
+                  JOIN case_statuses csst ON vemp.case_key = csst.case_key
+                  WHERE vemp.lastname NOT LIKE 'XXX%'
+                    AND csst.case_stat_cd <> '09'
+                    AND csst.rec_stat_cd = '0'
+                    AND (csst.xpir_dt IS NULL OR csst.xpir_dt > SYSDATE)
+                    AND csst.eff_dt <= SYSDATE
+                    AND fls_fatum.get_mbr_stat(vemp.case_mbr_key, SYSDATE) <> 'Deceased'
+                    AND vemp.cont_no = '${employer}'
+                    AND vemp.mbr_no IN (${anums})`,
         });
 
-        if (
-          anumercheck == resultmem.data.data.length &&
-          resultgnummer.data.data[0].CONT_NO == JSON.parse(jresult).Employer
-        ) {
-          if (veri == 1) {
-            res.json({ status: "already stored", data: resultmem.data.data });
-          } else {
-            res.json({ status: "new" });
-          }
+        const resultgnummer = await axios.post(process.env.API_TST, {
+          query: `SELECT * FROM case_data casd WHERE casd.cont_no = '${employer}'`,
+        });
+
+        const membersMatch =
+          participantNumbers.length === resultmem.data.data.length;
+        const employerMatch = resultgnummer.data.data[0]?.CONT_NO === employer;
+
+        if (membersMatch && employerMatch) {
+          res.json({
+            status: recordExists ? "already stored" : "new",
+            data: recordExists ? resultmem.data.data : undefined,
+          });
+        } else if (employerMatch) {
+          const unmatchedParticipants = participantNumbers.filter(
+            (num) =>
+              !resultmem.data.data.some((record) => record.MBR_NO === num)
+          );
+
+          res.json({
+            status: "aonly",
+            data: unmatchedParticipants,
+            dataG: employer,
+          });
         } else {
-          if (resultgnummer.data.data.length > "0") {
-            var arrresp = [];
-            var arrAnummers = [];
-            resultmem.data.data.forEach(function (number) {
-              arrAnummers.push(number.MBR_NO);
-            });
-            for (let i = 0; i < participantNumbers.length; i++) {
-              if (!arrAnummers.includes(participantNumbers[i])) {
-                arrresp.push(participantNumbers[i]);
-              }
-            }
-            res.json({
-              status: "aonly",
-              data: arrresp,
-              dataG: JSON.parse(jresult).Employer,
-            });
-          } else {
-            res.json({
-              status: "agonly",
-              dataG: JSON.parse(jresult).Employer,
-            });
-          }
+          res.json({
+            status: "agonly",
+            dataG: employer,
+          });
         }
       } catch (error) {
-        console.error(error);
+        console.error("Error in compass check", error);
+        res.status(500).json({ message: "Error during compass verification" });
       }
     }
-  } catch (err) {
-    console.error("Error executing query", err);
+  } catch (error) {
+    console.error("Error executing database query", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+app.post("/send_data_payroll", async (req, res) => {
+  const { jresult, username, filename } = req.body;
+  let datenow;
+
+  function getFormattedDate() {
+    const now = new Date();
+    datenow = `${String(now.getDate()).padStart(2, "0")}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}-${now.getFullYear()} ${String(now.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(now.getMinutes()).padStart(2, "0")}:${String(
+      now.getSeconds()
+    ).padStart(2, "0")}:${String(now.getMilliseconds()).padStart(3, "0")}`;
+  }
+  getFormattedDate();
+
+  let json_data;
+  try {
+    json_data = JSON.parse(jresult);
+  } catch (error) {
+    return res.status(400).json({ status: "error", message: "Invalid JSON" });
+  }
+
+  var periodD = json_data.PeriodDate;
+
+  const dataEntries = json_data.data.map((entry) => {
+    const birthYear = new Date(entry.BirthDate).getFullYear();
+    const prefix = birthYear.toString().slice(0, 2);
+    entry["ID. Nr."] = `${prefix}${entry["ID. Nr."]}`;
+    return entry;
+  });
+
+  const idnumArray = dataEntries.map((item) => item["ID. Nr."]);
+  const areAllIdsValid = idnumArray.every((id) => id.length === 10);
+
+  if (!areAllIdsValid) {
+    return res
+      .status(400)
+      .json({ status: "error", message: "Invalid ID lengths" });
+  }
+
+  const query =
+    `
+    SELECT ve.MBR_NO, p.NATLIDNO 
+    FROM VEMPLOYEES ve 
+    INNER JOIN PERSON p ON p.NAMEID = ve.NAMEID 
+    WHERE ve.CONT_NO = '` +
+    json_data.Gnummer +
+    `' AND p.NATLIDNO IN (${idnumArray.map((id) => `'${id}'`).join(",")})
+  `;
+
+  try {
+    const resultmem = await axios.post(process.env.API_TST, { query });
+    // console.log(resultmem.data.data)
+    const jsonArray = resultmem.data.data;
+    const jsonNATLIDNOs = jsonArray.map((item) => item.NATLIDNO);
+    const missingItems = idnumArray.filter(
+      (item) => !jsonNATLIDNOs.includes(item)
+    );
+
+    if (missingItems.length > 0) {
+      return alertClient(res, missingItems, missingItems.length);
+    }
+
+    const natlIdMap = Object.fromEntries(
+      jsonArray.map((member) => [member.NATLIDNO, member.MBR_NO])
+    );
+
+    json_data.data.forEach((entry) => {
+      if (natlIdMap[entry["ID. Nr."]]) {
+        entry["ID. Nr."] = natlIdMap[entry["ID. Nr."]];
+      }
+    });
+
+    const outputJson = {
+      Mutaties: {
+        Portal_Request: [
+          {
+            CASE_KEY: json_data.Gnummer,
+            UPLOAD_DT:  datenow,
+            TYP_CD: "00",
+            PORTAL_CHANGE_CD: "6",
+            SAL_RENEW_CD: "N",
+            CHNG_DT: json_data.PeriodDate,
+            SPRM_TOTAL_AMT: json_data.TotalPAmount.toFixed(2),
+            SINGLE_PREMIUMS: json_data.data.map((wn) => ({
+              CASE_MBR_KEY: wn["ID. Nr."],
+              SINGLE_PREMIUM: wn["Amount"],
+            })),
+          },
+        ],
+        Aantal_Mutaties: "1",
+      },
+    };
+    // console.log(outputJson)
+    await getTokenAndSendRequest(
+      res,
+      outputJson,
+      json_data.Gnummer,
+      username,
+      filename,
+      json_data.TotalPAmount.toFixed(2),
+      json_data.data.length,
+      "Payroll Import"
+    );
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        status: "error",
+        message: "Internal server error, Please contact IT Department",
+      });
+  }
+
+  function alertClient(res, missingItems, itleng) {
+    if (itleng <= 5) {
+      return res.json({
+        status: "miss",
+        message: `${itleng} ID's cannot be found in Compass <br>${missingItems}`,
+      });
+    } else {
+      return res.json({
+        status: "miss",
+        message:
+          "A number of ID's cannot be found in Compass <br>Please add correctly!",
+      });
+    }
+  }
+});
+
+async function getTokenAndSendRequest(
+  res,
+  output,
+  gnummer,
+  username,
+  filename,
+  totalamount,
+  amanummer,
+  type
+) {
+  try {
+    const auth = {
+      username: process.env.USERNAME_API_TST,
+      password: process.env.PASSWORD_API_TST,
+    };
+
+    const tokenResponse = await axios.post(
+      process.env.API_URL_TOEKN_TST,
+      qs.stringify({ grant_type: "client_credentials" }),
+      {
+        auth,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }
+    );
+
+    const token = tokenResponse.data.access_token;
+    // console.log("Token received:", token);
+
+    const response = await axios.post(
+      process.env.API_URL_TRANSACTION_TST,
+      output,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    res.json({ status: "ok", data: response.data });
+    store_data(gnummer, username, "", totalamount, type);
+    store_koopsom_action(gnummer, username, filename, totalamount, amanummer);
+  } catch (error) {
+    console.error(
+      "Error:",
+      error.response ? error.response.data : error.message
+    );
+  }
+}
 
 function moveFiles(srcFilePath, destDirPath, fileName) {
   const destFilePath = path.join(destDirPath, fileName);
@@ -2149,6 +2274,33 @@ function send_onboard_mail(user) {
     console.log("Message sent: %s", info.messageId);
   });
 }
+
+async function tst() {
+  // const query = `
+  // SELECT ve.MBR_NO, p.NATLIDNO
+  // FROM VEMPLOYEES ve
+  // INNER JOIN PERSON p ON p.NAMEID = ve.NAMEID
+  // WHERE ve.CONT_NO = 'G000982'and p.NATLIDNO = '1974050299'
+  // `;
+
+  const query = `
+  SELECT to_char(vemp.case_mbr_key) AS ForeignKey,
+                         vemp.cont_no,
+                         vemp.mbr_no
+                  FROM vemployees vemp
+                  JOIN case_data casd ON casd.case_key = vemp.case_key
+                  JOIN case_statuses csst ON vemp.case_key = csst.case_key
+                  WHERE vemp.lastname NOT LIKE 'XXX%'
+                    AND csst.case_stat_cd <> '09'
+                    AND csst.rec_stat_cd = '0'
+                    AND (csst.xpir_dt IS NULL OR csst.xpir_dt > SYSDATE)
+                    AND csst.eff_dt <= SYSDATE
+                    AND fls_fatum.get_mbr_stat(vemp.case_mbr_key, SYSDATE) <> 'Deceased'
+                    AND vemp.cont_no = 'G001196'`;
+  const resultmem = await axios.post(process.env.API_TST, { query });
+  console.log(resultmem.data.data);
+}
+tst();
 
 app.use(require("./routes"));
 app.use(express.static(path.join(__dirname, "public")));
